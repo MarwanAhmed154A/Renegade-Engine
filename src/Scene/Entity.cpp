@@ -1,0 +1,20 @@
+#include "Entity.h"
+#include "Components.h"
+
+namespace RG
+{
+	Entity::Entity() : m_parent(nullptr), m_name("Entity")
+	{
+		transform = (Transform*)(m_components.Push(new Transform));
+	}
+
+	Entity::Entity(std::string name) : m_parent(nullptr), m_name(name)
+	{
+		transform = (Transform*)(m_components.Push(new Transform));
+	}
+
+	void Entity::AddComponent(Component* component)
+	{
+		m_components.Push(component);
+	}
+}
