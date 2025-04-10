@@ -72,6 +72,14 @@ namespace RG
 	public:
 		static void Init();
 		static void AddCallback(int EventType, BaseFuncPtr* func);
+		
+		template<typename T>
+		static void AddCallback(int EventType, T* obj, void(T::* func)(class Event* e))
+		{
+			//instead of making the funcPtr(callback ptr) manually, the function takes all the parameters and does it all at once
+			events[EventType]->ptrs.Push(new FuncPtr<T>(obj, func));
+		}
+
 		static void Invoke(Event* e);
 	private:
 		static Vec<Event*> events;
