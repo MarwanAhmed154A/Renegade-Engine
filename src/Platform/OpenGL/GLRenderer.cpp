@@ -132,7 +132,7 @@ namespace RG
 
 	void GLRenderer::OnSceneInitCallback(class Event* e)
 	{
-		ents = ((OnSceneInitEvent*)e)->vec;
+		ents = e->SafeCastTo<OnSceneInitEvent>()->vec;
 	}
 
 	void GLRenderer::OnWindowResizeCallback(Event* event)
@@ -143,7 +143,7 @@ namespace RG
 		if (Time::GetTime() - lastResizeTime > 1.0f)
 		{
 			//Convert to needed event type
-			OnWindowResizeEvent* e = (OnWindowResizeEvent*)event;
+			OnWindowResizeEvent* e = event->SafeCastTo<OnWindowResizeEvent>();
 
 			//Resize framebuffer
 			m_nativeOutput->Resize(e->size);

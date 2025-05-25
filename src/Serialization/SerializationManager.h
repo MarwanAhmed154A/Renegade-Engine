@@ -13,7 +13,6 @@ namespace RG
 		static void Save(std::string file);
 		static void Load(std::string file);
 	private:
-		static SerializationManager* s_instance; //to deal with events
 		void OnSceneInitCallback(class Event*);
 
 		static inline void SaveString(std::string str, std::ofstream& file);

@@ -12,12 +12,11 @@ using namespace std;
 
 namespace RG
 {
-	SerializationManager* SerializationManager::s_instance;
 	std::vector<Entity*>* SerializationManager::ents;
 
 	void SerializationManager::Init()
 	{
-		EventManager::AddCallback<SerializationManager>(EventType::OnSceneInit, s_instance, &OnSceneInitCallback);
+		EventManager::AddCallback<SerializationManager>(EventType::OnSceneInit, nullptr, &OnSceneInitCallback);
 	}
 
 	void SerializationManager::Save(std::string file)
@@ -228,7 +227,7 @@ namespace RG
 	}
 
 	/// <summary>
-	/// Saves string size then string, don't forget to add /0 when loading
+	///
 	/// </summary>
 	/// <param name="str">string to save</param>
 	/// <param name="file">refrence file to save to</param>

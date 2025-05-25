@@ -46,6 +46,22 @@ namespace RG
 	public:
 		void Invoke(Event* e);
 		int type;
+
+		/// <summary>
+		/// Use to cast to specific needed event type to get event data safely
+		/// </summary>
+		/// <typeparam name="T">required Event based type to cast to</typeparam>
+		/// <returns>safe pointer of the required type, nullptr if cast is unsafe</returns>
+		template<typename T>
+		T* SafeCastTo()
+		{
+			T t;
+
+			if (((Event*)&t)->type == type)
+				return (T*)this;
+
+			return nullptr;
+		}
 	protected:
 		friend class EventManager;
 	};
