@@ -1,0 +1,92 @@
+#pragma once
+
+#include "Vec.h"
+#include "Maths/Vec2.h"
+
+#include <memory>
+
+namespace RG
+{
+	class CallbackBase
+	{
+	public:
+		//Call member func pointer and pass event with info as parameter
+		virtual void DoFunc(class Event* e) = 0;
+	};
+
+	//Funcs have to be in .h because of template
+
+	template<typename T>
+	class Callback : public CallbackBase
+	{
+	public:
+		void(T::* func)(class Event* e);
+		T* object;
+
+		Callback() {}
+		Callback(T* obj, void(T::* func)(class Event* e))
+		{
+			object = obj;
+			this->func = func;
+		}
+
+		virtual void DoFunc(class Event* e) override
+		{
+			(object->*func)(e);
+		}
+	};
+
+	enum EventType
+	{
+		OnRender, OnBegin, OnRenderUI, OnWindowResize, OnSceneInit
+	};
+
+	struct Event
+	{
+	public:
+		void Invoke(Event* e);
+		int type;
+	protected:
+		friend class EventManager;
+	};
+
+	struct OnRenderEvent : public Event
+	{
+	public:
+		OnRenderEvent();
+		
+		Vec<class Entity*>* vec;
+	};
+
+	struct OnWindowResizeEvent : public Event
+	{
+	public:
+		OnWindowResizeEvent();
+
+		Vec2 size;
+	};
+
+	struct OnSceneInitEvent : public Event
+	{
+		OnSceneInitEvent();
+
+		Vec<class Entity*>* vec;
+	};
+
+	class EventManager
+	{
+	public:
+		static void Init();
+
+		template<typename T>
+		static void AddCallback(int EventType, T* obj, void(T::* func)(class Event* e))
+		{
+			//instead of making the callback ptr manually, the function takes all the parameters and does it all at once
+			callbacks[EventType].PushMove(std::make_unique<Callback<T>>(obj, func));
+		}
+
+		static void Invoke(Event* e);
+	private:
+		static Vec<Vec<std::unique_ptr<CallbackBase>>> callbacks;
+	};
+}
