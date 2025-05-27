@@ -1,1 +1,41 @@
-Renegade Engine A fast, modular C++20 game engine built from scratch for flexibility, performance, and full control. Features fully custom: reflection, binary serialization, clean ECS, and an event-driven core — all written with minimal dependencies and zero editor bloat. Highlights Entity-Component System: Lightweight, scalable design. Reflection System: Static-init startup tool — no RTTI, no .gen files, minimal overhead. Binary Serialization: Pointer-safe, editor-ready, supports future type expansions by default. Event System: Callback-based, template-based, type-safe, and fully decoupled. Editor Tools: ImGui-based inspector UI powered by real-time reflection. Tech Stack Language: C++20 Platform: Windows (Linux coming later) Editor: Visual Studio 2022 Dependencies: ImGui, spdlog, stb, assimp, GLFW, GLAD In Progress 3D OpenGL Renderer (Deferred pipeline) Bullet Physics Integration Asset Management (with automatic unloading) ECS Memory Pooling Hot-reloading via DLLs Audio System Why? Because most engines are either bloated or inflexible. Renegade is for devs who want real control: minimal layers, clean APIs, and full understanding of what’s under the hood. License: Apache 2.0.
+# Renegade Engine
+
+**Renegade** is a fast, modular C++20 game engine meticulously built from scratch for developers who demand **flexibility, uncompromising performance, and absolute control.** Tired of bloated abstractions and rigid frameworks, we engineered Renegade to provide minimal layers, clean APIs, and a complete understanding of what's under the hood.
+
+This isn't just another engine; it's a foundation for crafting high-performance games with a focus on core engineering excellence.
+
+---
+
+### **Key Features**
+
+* **Reflection System:** A fully custom, static-init driven reflection system with **zero RTTI and no generated files**. Powers dynamic data access with minimal overhead.
+* **Binary Serialization:** Robust, pointer-safe, and editor-ready. Supports future type expansions by default for seamless data persistence.
+* **Entity-Component System (ECS):** A lightweight, scalable, and clean ECS designed for optimal cache performance and flexible game logic.
+* **Event-Driven Core:** A type-safe, callback-based, and fully decoupled event system for clean communication between engine modules.
+* **ImGui-Based Editor Tools:** Real-time inspector UI and tooling powered by the engine's integrated reflection system.
+
+---
+
+### **Tech Stack**
+
+* **Language:** C++20
+* **Platform:** Windows (Linux support planned)
+* **Development Environment:** Visual Studio 2022
+* **Dependencies:** ImGui, spdlog, stb, assimp, GLFW, GLAD
+
+---
+
+### **Currently In Progress**
+
+* 3D OpenGL Renderer (Deferred pipeline)
+* Bullet Physics Integration
+* Robust Asset Management (with automatic unloading)
+* ECS Memory Pooling
+* Hot-reloading via DLLs
+* Audio System
+
+---
+
+### **License**
+
+Renegade Engine is released under the Apache 2.0 License.
