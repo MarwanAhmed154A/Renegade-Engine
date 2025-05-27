@@ -24,13 +24,13 @@ namespace RG
 		T* object;
 
 		Callback() {}
-		Callback(T* obj, void(T::* func)(class Event* e))
+		Callback(T* obj, void(T::* func)(struct Event* e))
 		{
 			object = obj;
 			this->func = func;
 		}
 
-		virtual void DoFunc(class Event* e) override
+		virtual void DoFunc(struct Event* e) override
 		{
 			(object->*func)(e);
 		}
@@ -95,7 +95,7 @@ namespace RG
 		static void Init();
 
 		template<typename T>
-		static void AddCallback(int EventType, T* obj, void(T::* func)(class Event* e))
+		static void AddCallback(int EventType, T* obj, void(T::* func)(struct Event* e))
 		{
 			//instead of making the callback ptr manually, the function takes all the parameters and does it all at once
 			callbacks[EventType].PushMove(std::make_unique<Callback<T>>(obj, func));

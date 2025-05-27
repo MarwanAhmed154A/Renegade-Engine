@@ -18,7 +18,8 @@ namespace RG
 	{
 	public:
 		ReflectedProp() = default;
-		ReflectedProp(std::string name, int offset, InspectableType type, class ReflectedTypeData* parent);
+		//ReflectedProp(std::string name, int offset, InspectableType type, class ReflectedTypeData* parent);
+		ReflectedProp(std::string name, int offset, InspectableType type, int ID);
 
 		InspectableType type;
 		std::string name;
@@ -28,8 +29,8 @@ namespace RG
 	class ReflectedTypeData
 	{
 	public:
-		std::vector<ReflectedProp> vars;
-		ReflectedTypeData(std::string type_name, BaseSceneObject* e, BaseSceneObject* parent);
+		std::vector<ReflectedProp*> vars;
+		ReflectedTypeData(std::string type_name, BaseSceneObject* e, BaseSceneObject* parent, void(*setter)(int, int));
 
 		int AddedIndex, parentIndex;
 
@@ -44,7 +45,7 @@ namespace RG
 
 		static int Add(ReflectedTypeData* a);
 		static std::vector<BaseSceneObject*>* GetTypes();
-		static std::vector<ReflectedProp>* GetVarsFromType(int ID);
+		static std::vector<ReflectedProp*>* GetVarsFromType(int ID);
 		static const std::string GetTypeName(int ID);
 		static const std::string GetTypeName(BaseSceneObject*);
 		static BaseSceneObject* GetType(std::string type_name);
@@ -59,13 +60,13 @@ namespace RG
 			if (!&(*s_reflectionDataList)[ID])
 				return nullptr;
 
-			std::vector<ReflectedProp>* vars = &(*s_reflectionDataList)[ID]->vars; //Get the variables metadata list
+			std::vector<ReflectedProp*>* vars = &(*s_reflectionDataList)[ID]->vars; //Get the variables metadata list
 
 			for (int i = 0; i < s_reflectionDataList->size(); i++)
 			{
-				if ((*vars)[i].name == name) //iterate to find the variable with the same name
+				if ((*vars)[i]->name == name) //iterate to find the variable with the same name
 				{
-					return (T*)((char*)obj + (*vars)[i].offset); //add the offset to the object pointer to find the needed variable in memory
+					return (T*)((char*)obj + (*vars)[i]->offset); //add the offset to the object pointer to find the needed variable in memory
 				}
 			}
 
@@ -73,11 +74,13 @@ namespace RG
 		}
 
 	private:
-		static std::vector<BaseSceneObject*>* s_types;
-		static std::vector<ReflectedTypeData*>* s_reflectionDataList;
+		inline static std::vector<BaseSceneObject*>* s_types;
+		inline static std::vector<ReflectedTypeData*>* s_reflectionDataList;
+		friend class  ReflectedProp;
 	};
 } 
 
 using namespace RG;
-#define ADD(x) extern ReflectedTypeData* x##_adder = new ReflectedTypeData(#x, new x, new x##::Super); int x##::s_TypeID = x##_adder->AddedIndex; int x##::s_parentTypeID = x##_adder->parentIndex; int x##::s_Size = sizeof(x);
-#define ADDVAR(type, x, v) x x##_for_##v##_Loc; int v##_offset_in_##x## = (char*)&(x##_for_##v##_Loc.##v##) - (char*)&(x##_for_##v##_Loc); ReflectedProp v_for_##v## = ReflectedProp(#v, v##_offset_in_##x##, type, x##_adder);
+#define ADD(x) int  x##::s_parentTypeID = 0; int x##::s_TypeID = 0; char x::x##_adder = *(char*)new ReflectedTypeData(#x, new x, new x##::Super, [](int ID, int pID){x##::s_TypeID = ID; x##::s_parentTypeID = pID;}); int x##::s_Size = sizeof(x);
+#define ADDVAR(type, x, v) inline static char v_for_##v## = *(char*)new ReflectedProp(#v, offsetof(x, v), type, x##::s_GetTypeID());
+#define ADDPRV(type, x, v) static int ;

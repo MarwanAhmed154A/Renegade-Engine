@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include "RString.h"
 
 namespace RG
 {

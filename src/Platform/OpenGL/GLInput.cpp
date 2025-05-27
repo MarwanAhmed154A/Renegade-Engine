@@ -4,7 +4,7 @@
 
 #include <GLFW/glfw3.h>
 
-#define NUMBER_OF_KEYS 10
+#define NUMBER_OF_KEYS 20
 
 namespace RG
 {
@@ -22,6 +22,7 @@ namespace RG
 		glKeys[KeyCodes::RIGHT].keyCode = GLFW_KEY_RIGHT;
 		glKeys[KeyCodes::ESC].keyCode = GLFW_KEY_ESCAPE;
 		glKeys[KeyCodes::ENTER].keyCode = GLFW_KEY_ENTER;
+		glKeys[KeyCodes::LEFT_CTRL].keyCode = GLFW_KEY_LEFT_CONTROL;
 	}
 
 	void GLInput::UpdateImpl()

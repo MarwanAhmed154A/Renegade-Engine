@@ -10,7 +10,7 @@ namespace RG
 
 	enum KeyCodes
 	{
-		W, A, S, D, UP, DOWN, LEFT, RIGHT, ESC, ENTER
+		W, A, S, D, UP, DOWN, LEFT, RIGHT, ESC, ENTER, LEFT_CTRL
 	};
 
 	enum class KeyState

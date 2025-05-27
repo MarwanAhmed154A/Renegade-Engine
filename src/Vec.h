@@ -37,8 +37,7 @@ namespace RG
 
 		int GetLength()
 		{
-			return vec.size();
-			
+			return (int)vec.size();
 		}
 
 		operator std::vector<T>() { return vec; }

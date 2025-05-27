@@ -10,7 +10,7 @@ namespace RG
 	{
 	public:
 		Scene();
-		~Scene() { delete event; }
+		//~Scene() { delete event; }
 
 		Entity* AddEntity(Entity* ent);
 
@@ -36,7 +36,7 @@ namespace RG
 	private:
 		friend class Rigidbody2D;
 		//class OnRenderEvent* event;
-		class OnSceneInitEvent* event;
+		struct OnSceneInitEvent* event;
 		Vec<Entity*> m_entities;
 	};
 }

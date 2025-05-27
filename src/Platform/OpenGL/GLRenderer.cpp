@@ -130,14 +130,14 @@ namespace RG
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void GLRenderer::OnSceneInitCallback(class Event* e)
+	void GLRenderer::OnSceneInitCallback(struct Event* e)
 	{
 		ents = e->SafeCastTo<OnSceneInitEvent>()->vec;
 	}
 
 	void GLRenderer::OnWindowResizeCallback(Event* event)
 	{
-		static int lastResizeTime = Time::GetTime();
+		static double lastResizeTime = Time::GetTime();
 
 		//resize only once a second
 		if (Time::GetTime() - lastResizeTime > 1.0f)

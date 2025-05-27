@@ -4,12 +4,13 @@
 #include "Maths/Vec2.h"
 #include "Maths/Vec3.h"
 #include "BaseSceneObject.h"
-#include "RString.h"
+#include "Header Tool/ReflectionManager.h"
 
 #include "Platform/OpenGL/GLTexture.h"
 //#include "Scene/Entity.h"
 
-#define GEN(x, parent) protected: static int s_parentTypeID; protected: static int s_TypeID; static int s_Size; public: typedef parent Super; virtual int GetTypeID() override {return s_TypeID;} virtual BaseSceneObject* GetCopy(char* binary) {return new x##(*(x##*)binary);} virtual int GetSize() override {return s_Size;} static int s_GetTypeID() {return s_TypeID;}
+#define GEN(x, parent) friend class ReflectionManager; protected: static int s_parentTypeID; protected: static int s_TypeID; static int s_Size;  static char x##_adder; public: typedef parent Super; virtual int GetTypeID() override {return s_TypeID;} virtual BaseSceneObject* GetCopy(char* binary) {return new x##(*(x##*)binary);} virtual int GetSize() override {return s_Size;} static int s_GetTypeID() {return s_TypeID;}
+#define ADDPRV(type, x, v) static int*;
 
 namespace RG
 {
@@ -54,6 +55,7 @@ namespace RG
 	class Transform : public Component
 	{
 		GEN(Transform, Component)
+
 
 		Transform() : Position(145, 643, 0) {}
 	public:

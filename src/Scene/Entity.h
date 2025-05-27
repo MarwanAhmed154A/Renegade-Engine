@@ -7,7 +7,7 @@
 #include <string>
 #include <memory>
 
-#define GEN(x, parent) protected: static int s_parentTypeID; static int s_TypeID; static int s_Size; public: typedef parent Super; virtual int GetTypeID() override {return s_TypeID;} virtual BaseSceneObject* GetCopy(char* binary) {return new x##(*(x##*)binary);} virtual int GetSize() override {return s_Size;} static int s_GetTypeID() {return s_TypeID;}
+//#define GEN(x, parent) protected: static int s_parentTypeID; static int s_TypeID; static int s_Size; static ReflectedTypeData* x##_adder; public: typedef parent Super; virtual int GetTypeID() override {return s_TypeID;} virtual BaseSceneObject* GetCopy(char* binary) {return new x##(*(x##*)binary);} virtual int GetSize() override {return s_Size;} static int s_GetTypeID() {return s_TypeID;}
 
 namespace RG
 {

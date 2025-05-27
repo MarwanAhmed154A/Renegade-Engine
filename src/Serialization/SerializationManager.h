@@ -13,7 +13,7 @@ namespace RG
 		static void Save(std::string file);
 		static void Load(std::string file);
 	private:
-		void OnSceneInitCallback(class Event*);
+		void OnSceneInitCallback(struct Event*);
 
 		static inline void SaveString(std::string str, std::ofstream& file);
 		static inline std::string LoadStringCurSize(std::ifstream& file);

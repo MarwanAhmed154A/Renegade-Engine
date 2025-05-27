@@ -233,7 +233,7 @@ namespace RG
 	/// <param name="file">refrence file to save to</param>
 	inline void SerializationManager::SaveString(std::string str, std::ofstream& file)
 	{
-		int entTypenameSize = str.size();
+		int entTypenameSize = (int)str.size();
 
 		file.write((const char*)&entTypenameSize, 4);
 		file.write(str.c_str(), entTypenameSize);

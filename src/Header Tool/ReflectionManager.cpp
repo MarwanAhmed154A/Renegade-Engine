@@ -4,19 +4,21 @@
 
 namespace RG
 {
-	ReflectedProp::ReflectedProp(std::string name, int offset, InspectableType type, ReflectedTypeData* parent) : name(name), offset(offset), type(type)
+	//std::vector<BaseSceneObject*>* ReflectionManager::s_types;
+	//std::vector<ReflectedTypeData*>* ReflectionManager::s_reflectionDataList;
+
+	ReflectedProp::ReflectedProp(std::string name, int offset, InspectableType type, int ID) : name(name), offset(offset), type(type)
 	{
-		parent->vars.push_back(*this);
+		ReflectionManager::s_reflectionDataList[0][ID]->vars.push_back(this);
 	}
 
-	std::vector<BaseSceneObject*>* ReflectionManager::s_types;
-	std::vector<ReflectedTypeData*>* ReflectionManager::s_reflectionDataList;
 
-	ReflectedTypeData::ReflectedTypeData(std::string type_name, BaseSceneObject* e, BaseSceneObject* parent) : type_name(type_name)
+	ReflectedTypeData::ReflectedTypeData(std::string type_name, BaseSceneObject* e, BaseSceneObject* parent, void(*setter)(int, int)) : type_name(type_name)
 	{
 		ent = e;
 		AddedIndex = ReflectionManager::Add(this) - 1;
 		parentIndex = parent->GetTypeID();
+		setter(AddedIndex, parentIndex);
 	}
 
 	void ReflectionManager::Init()
@@ -30,9 +32,9 @@ namespace RG
 		static std::vector<BaseSceneObject*>*   types              = s_types              = new std::vector<BaseSceneObject*>();
 		static std::vector<ReflectedTypeData*>* reflectionDataList = s_reflectionDataList = new std::vector<ReflectedTypeData*>();
 
-		s_types->push_back(a->ent);
+		s_types->push_back( a->ent);
 		s_reflectionDataList->push_back(a);
-
+		
 		return s_types->size();
 	}
 
@@ -41,7 +43,7 @@ namespace RG
 		return s_types;
 	}
 
-	std::vector<ReflectedProp>* ReflectionManager::GetVarsFromType(int ID)
+	std::vector<ReflectedProp*>* ReflectionManager::GetVarsFromType(int ID)
 	{
 		return &(*s_reflectionDataList)[ID]->vars;
 	}
