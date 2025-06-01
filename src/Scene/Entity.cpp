@@ -2,7 +2,7 @@
 #include "Components.h"
 #include "Header Tool/ReflectionManager.h"
 
-ADD(Entity)
+REFLECT_REGISTER_TYPE(Entity)
 
 namespace RG
 {

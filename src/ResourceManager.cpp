@@ -2,21 +2,23 @@
 #include "Platform/OpenGL/GLTexture.h"
 #include "Log.h"
 
-RG::Vec<RG::Texture*> RG::ResourceManager::m_textures;
+RG::Vec<std::weak_ptr<RG::Texture>> RG::ResourceManager::m_textures;
 
 namespace RG
 {
-	Texture* RG::ResourceManager::Create(const char* file_name)
+	std::shared_ptr<Texture> ResourceManager::Create(const char* file_name)
 	{
 		for (int i = 0; i < m_textures.GetLength(); i++)
-			if (m_textures[i]->GetPath() == file_name)
+			if (m_textures[i].lock().get()->GetPath() == file_name)
 			{
 				RG_CORE_INFO("TEXTURE LOADED")
-				return m_textures[i];
+				return m_textures[i].lock();
 			}
 		
 		RG_CORE_INFO("TEXTURE NOT LOADED, LOADING...")
-		m_textures.Push(new GLTexture(file_name));
-		return m_textures[m_textures.GetLength() - 1];
+
+		std::shared_ptr temp = std::make_shared<GLTexture>(GLTexture(file_name));
+		m_textures.Push(temp);
+		return temp;
 	}
 }

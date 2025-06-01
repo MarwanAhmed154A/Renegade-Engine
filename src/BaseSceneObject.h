@@ -12,7 +12,7 @@ namespace RG
 
 		virtual int GetSize()
 		{
-			return s_Size;
+			return 0;
 		}
 
 		static int s_GetTypeID()
@@ -25,6 +25,5 @@ namespace RG
 		}
 
 		static int s_TypeID;
-		static int s_Size;
 	};
 }

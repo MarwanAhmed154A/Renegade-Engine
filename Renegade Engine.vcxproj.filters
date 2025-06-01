@@ -191,9 +191,6 @@
     <ClCompile Include="src\Serialization\SerializationManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\BaseSceneObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\GLFramebuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

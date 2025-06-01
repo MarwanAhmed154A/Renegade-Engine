@@ -4,13 +4,13 @@
 
 namespace RG
 {
-	Texture* Texture::CreateTexture(const char* file)
+	std::shared_ptr<Texture> Texture::CreateTexture(const char* file)
 	{
 		return ResourceManager::Create(file);
 	}
 
-	Texture* Texture::CreateTexture(unsigned char* data, int width, int height, int nrChannels)
+	std::shared_ptr<Texture> Texture::CreateTexture(unsigned char* data, int width, int height, int nrChannels)
 	{
-		return new GLTexture(data, width, height, nrChannels);
+		return  std::make_shared<GLTexture>(data, width, height, nrChannels);
 	}
 }

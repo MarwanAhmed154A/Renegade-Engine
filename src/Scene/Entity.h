@@ -13,7 +13,7 @@ namespace RG
 {
 	class Entity : public BaseSceneObject
 	{
-		GEN(Entity, BaseSceneObject)
+		REFLECTABLE_CLASS(Entity, BaseSceneObject)
 
 	public:
 		Entity();

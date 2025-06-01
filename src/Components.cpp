@@ -5,15 +5,14 @@
 #include "Header Tool/ReflectionManager.h"
 #include "Platform/OpenGL/GLTexture.h"
 
-ADD(Component)
-ADD(TextureComponent)
-ADD(Transform)
-//static Transform Transform_for_Position_Loc; static int Position_offset_in_Transform = (char*)&(Transform_for_Position_Loc.Position) - (char*)&(Transform_for_Position_Loc);  ReflectedProp v_for_Position = ReflectedProp("Position", Position_offset_in_Transform, InspectableType::Vec3, Transform_adder);
-ADD(Tilemap)
+REFLECT_REGISTER_TYPE(Component)
+REFLECT_REGISTER_TYPE(TextureComponent)
+REFLECT_REGISTER_TYPE(Transform)
+REFLECT_REGISTER_TYPE(Tilemap)
 
-ADDVAR(InspectableType::Vec3, Transform, Position);
-ADDVAR(InspectableType::Vec3, Transform, Rotation);
-ADDVAR(InspectableType::Vec3, Transform, LocalScale);
+REFLECT_PROP(InspectableType::Vec3, Transform, Position)
+REFLECT_PROP(InspectableType::Vec3, Transform, Rotation)
+REFLECT_PROP(InspectableType::Vec3, Transform, LocalScale)
 
 //RG::Transform* RG::Transform::Transform_for_Position_Loc = new Transform;
 

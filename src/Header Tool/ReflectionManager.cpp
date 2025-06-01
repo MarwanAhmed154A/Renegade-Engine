@@ -4,46 +4,42 @@
 
 namespace RG
 {
-	//std::vector<BaseSceneObject*>* ReflectionManager::s_types;
-	//std::vector<ReflectedTypeData*>* ReflectionManager::s_reflectionDataList;
+	Vec<BaseSceneObject*>* ReflectionManager::s_types;
+	Vec<ReflectedTypeData*>* ReflectionManager::s_reflectionDataList;
 
-	ReflectedProp::ReflectedProp(std::string name, int offset, InspectableType type, int ID) : name(name), offset(offset), type(type)
+	ReflectedProp::ReflectedProp(std::string name, int offset, InspectableType type, int ID) : name(name), offset(offset), type(type) {}
+
+	ReflectedTypeData::ReflectedTypeData(std::string type_name) : type_name(type_name) {}
+
+	char ReflectionManager::AddType(std::string type_name, BaseSceneObject* e, BaseSceneObject* parent, int& typeID, int& parentTypeID)
 	{
-		ReflectionManager::s_reflectionDataList[0][ID]->vars.push_back(this);
+		//initialize lists as ptrs, safety from unkown static-init order and UB, on static defintion lines to avoid multiple assignments of value
+		static Vec<BaseSceneObject*>* types = s_types = new Vec<BaseSceneObject*>();
+		static Vec<ReflectedTypeData*>* reflectionDataList = s_reflectionDataList = new Vec<ReflectedTypeData*>();
+
+		ReflectedTypeData* data = new ReflectedTypeData(type_name);
+
+		s_types->Push(e);
+		s_reflectionDataList->Push(data);
+
+		typeID = (int)s_types->GetLength() - 1;
+		parentTypeID = parent->s_TypeID;
+
+		return '0';
 	}
 
-
-	ReflectedTypeData::ReflectedTypeData(std::string type_name, BaseSceneObject* e, BaseSceneObject* parent, void(*setter)(int, int)) : type_name(type_name)
+	char ReflectionManager::AddProp(std::string name, int offset, InspectableType type, int ID)
 	{
-		ent = e;
-		AddedIndex = ReflectionManager::Add(this) - 1;
-		parentIndex = parent->GetTypeID();
-		setter(AddedIndex, parentIndex);
+		(*s_reflectionDataList)[ID]->vars.Push(new ReflectedProp(name, offset, type, ID)); //add this prop's metadata to it's owning class's data
+		return '0';
 	}
 
-	void ReflectionManager::Init()
-	{
-		//types.resize(1);
-	}
-
-	int ReflectionManager::Add(ReflectedTypeData* a)
-	{
-		//initialize lists as int, safety from unkown static-init order and UB, on static defintion lines to avoid multiple assignments of value
-		static std::vector<BaseSceneObject*>*   types              = s_types              = new std::vector<BaseSceneObject*>();
-		static std::vector<ReflectedTypeData*>* reflectionDataList = s_reflectionDataList = new std::vector<ReflectedTypeData*>();
-
-		s_types->push_back( a->ent);
-		s_reflectionDataList->push_back(a);
-		
-		return s_types->size();
-	}
-
-	std::vector<BaseSceneObject*>* ReflectionManager::GetTypes()
+	Vec<BaseSceneObject*>* ReflectionManager::GetTypes()
 	{
 		return s_types;
 	}
 
-	std::vector<ReflectedProp*>* ReflectionManager::GetVarsFromType(int ID)
+	Vec<ReflectedProp*>* ReflectionManager::GetVarsFromType(int ID)
 	{
 		return &(*s_reflectionDataList)[ID]->vars;
 	}
@@ -60,12 +56,15 @@ namespace RG
 
 	BaseSceneObject* ReflectionManager::GetType(std::string type_name)
 	{
-		for (int i = 0; i < s_reflectionDataList->size(); i++)
+		for (int i = 0; i < s_reflectionDataList->GetLength(); i++)
 		{
 			if ((*s_reflectionDataList)[i]->type_name == type_name)
 			{
 				return (*s_types)[i];
 			}
 		}
+		return nullptr;
 	}
 }
+
+int BaseSceneObject::s_TypeID = 999999999; //for safety

@@ -53,7 +53,6 @@
     <ClInclude Include="src\vendor\stbi\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\BaseSceneObject.cpp" />
     <ClCompile Include="src\Components.cpp" />
     <ClCompile Include="src\EngineInterface.cpp" />
     <ClCompile Include="src\Events\Event.cpp" />
