@@ -10,6 +10,8 @@ REFLECT_REGISTER_TYPE(TextureComponent)
 REFLECT_REGISTER_TYPE(Transform)
 REFLECT_REGISTER_TYPE(Tilemap)
 
+REFLECT_PRIV_PROP(InspectableType::Asset, TextureComponent, m_texture)
+
 REFLECT_PROP(InspectableType::Vec3, Transform, Position)
 REFLECT_PROP(InspectableType::Vec3, Transform, Rotation)
 REFLECT_PROP(InspectableType::Vec3, Transform, LocalScale)

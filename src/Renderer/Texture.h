@@ -3,10 +3,11 @@
 #include <string>
 #include <memory>
 #include <Log.h>
+#include "Asset.h"
 
 namespace RG
 {
-	class Texture
+	class Texture : public Asset
 	{
 	public:
 		static std::shared_ptr<Texture> CreateTexture(const char* file);
@@ -15,18 +16,10 @@ namespace RG
 		virtual void Bind() = 0;
 		virtual void Unload() = 0;
 
-		std::string GetPath() { return path; }
-		void SetPath(std::string new_path) { path = new_path; }
-
 		virtual unsigned int GetID() = 0;
 
-		~Texture()
-		{
-			RG_CORE_WARN("UNLOADED!!!");
-		}
 	protected:
 		friend class TextureComponent;
 		unsigned int texture;
-		std::string path;
 	};
 }

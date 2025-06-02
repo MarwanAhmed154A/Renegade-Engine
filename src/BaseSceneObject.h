@@ -10,12 +10,22 @@ namespace RG
 			return s_TypeID;
 		}
 
+		virtual int GetParentTypeID()
+		{
+			return s_TypeID;
+		}
+
 		virtual int GetSize()
 		{
 			return 0;
 		}
 
 		static int s_GetTypeID()
+		{
+			return s_TypeID;
+		}
+
+		static int s_GetParentTypeID()
 		{
 			return s_TypeID;
 		}

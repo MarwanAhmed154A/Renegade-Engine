@@ -8,7 +8,7 @@ namespace RG
 {
 	enum class InspectableType
 	{
-		Int, Float, String, Vec3
+		Int, Float, String, Vec3, Asset
 	};
 
 	class ReflectedProp
@@ -61,7 +61,8 @@ namespace RG
 			{
 				if ((*vars)[i]->name == name) //iterate to find the variable with the same name
 				{
-					return (T*)((char*)obj + (*vars)[i]->offset); //add the offset to the object pointer to find the needed variable in memory
+					T* t = (T*)((char*)obj + (*vars)[i]->offset); //add the offset to the object pointer to find the needed variable in memory
+					return t;
 				}
 			}
 
@@ -75,7 +76,7 @@ namespace RG
 }
 
 using namespace RG;
-#define REFLECTABLE_CLASS(x, parent)  protected: static int s_parentTypeID; protected: static int s_TypeID; static int s_Size;  static char x##_adder; public: typedef parent Super; virtual int GetTypeID() override {return s_TypeID;} virtual BaseSceneObject* GetCopy(char* binary) {return new x##(*(x##*)binary);} virtual int GetSize() override {return s_Size;} static int s_GetTypeID() {return s_TypeID;}
+#define REFLECTABLE_CLASS(x, parent)  protected: static int s_parentTypeID; protected: static int s_TypeID; static int s_Size;  static char x##_adder; public: typedef parent Super; virtual int GetTypeID() override {return s_TypeID;} virtual int GetParentTypeID() override {return s_parentTypeID;} virtual BaseSceneObject* GetCopy(char* binary) {return new x##(*(x##*)binary);} virtual int GetSize() override {return s_Size;} static int s_GetTypeID() {return s_TypeID;} static int s_GetParentTypeID() {return s_parentTypeID;}
 #define REFLECT_REGISTER_TYPE(x) int x##::s_parentTypeID = 0; int x##::s_TypeID = 0; char x::x##_adder = ReflectionManager::AddType(#x, new x, new x##::Super, s_TypeID, s_parentTypeID); int x##::s_Size = sizeof(x);
 #define REFLECT_PROP(type, x, v) static char  v##_in_##x##      = ReflectionManager::AddProp(#v, offsetof(x, v), type, x##::s_GetTypeID());
 #define REFLECTED_PRIV_DECL(type, x, v) static char v##_in_##x##;

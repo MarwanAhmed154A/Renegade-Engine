@@ -116,6 +116,11 @@ namespace RG
 
 			curTransform = (*ents)[i]->transform;
 			model = glm::translate(model, glm::vec3(curTransform->Position.x, curTransform->Position.y, curTransform->Position.z));
+
+			model = glm::rotate(model, glm::radians(curTransform->Rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(curTransform->Rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(curTransform->Rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+
 			model = glm::scale(model, glm::vec3(curTransform->LocalScale.x, curTransform->LocalScale.y, curTransform->LocalScale.z));
 
 			shader->SetMat4("model", glm::value_ptr(model));

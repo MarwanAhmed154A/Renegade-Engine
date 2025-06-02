@@ -39,8 +39,9 @@ namespace RG
 	{
 	private:
 		REFLECTABLE_CLASS(TextureComponent, Component);
-		std::shared_ptr<Texture> m_texture;
 
+		std::shared_ptr<Texture> m_texture;
+		REFLECTED_PRIV_DECL(InspectableType::Asset, TextureComponent, m_texture)
 	public:
 		TextureComponent();
 		TextureComponent(const char* path);
