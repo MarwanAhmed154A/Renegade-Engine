@@ -28,9 +28,13 @@
     <ClInclude Include="src\Header Tool\ReflectionManager.h" />
     <ClInclude Include="src\Input\Input.h" />
     <ClInclude Include="src\Log.h" />
+    <ClInclude Include="src\Material.h" />
     <ClInclude Include="src\Maths\Transform.h" />
     <ClInclude Include="src\Maths\Vec2.h" />
     <ClInclude Include="src\Maths\Vec3.h" />
+    <ClInclude Include="src\Mesh.h" />
+    <ClInclude Include="src\Model.h" />
+    <ClInclude Include="src\Platform\OpenGL\GLCubemap.h" />
     <ClInclude Include="src\Platform\OpenGL\GLFramebuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\GLInput.h" />
     <ClInclude Include="src\Platform\OpenGL\GLRenderer.h" />
@@ -38,6 +42,7 @@
     <ClInclude Include="src\Platform\OpenGL\GLTexture.h" />
     <ClInclude Include="src\Platform\OpenGL\GLTime.h" />
     <ClInclude Include="src\Platform\OpenGL\GL_RGWindow.h" />
+    <ClInclude Include="src\Renderer\Cubemap.h" />
     <ClInclude Include="src\Renderer\Framebuffer.h" />
     <ClInclude Include="src\Renderer\Renderer.h" />
     <ClInclude Include="src\Renderer\RGWindow.h" />
@@ -53,6 +58,7 @@
     <ClInclude Include="src\vendor\stbi\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Asset.cpp" />
     <ClCompile Include="src\Components.cpp" />
     <ClCompile Include="src\EngineInterface.cpp" />
     <ClCompile Include="src\Events\Event.cpp" />
@@ -63,6 +69,9 @@
     <ClCompile Include="src\Maths\Transform.cpp" />
     <ClCompile Include="src\Maths\Vec2.cpp" />
     <ClCompile Include="src\Maths\Vec3.cpp" />
+    <ClCompile Include="src\Mesh.cpp" />
+    <ClCompile Include="src\Model.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\GLCubemap.cpp" />
     <ClCompile Include="src\Platform\OpenGL\GLFramebuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\GLInput.cpp" />
     <ClCompile Include="src\Platform\OpenGL\GLRenderer.cpp" />
@@ -70,6 +79,7 @@
     <ClCompile Include="src\Platform\OpenGL\GLTexture.cpp" />
     <ClCompile Include="src\Platform\OpenGL\GLTime.cpp" />
     <ClCompile Include="src\Platform\OpenGL\GL_RGWindow.cpp" />
+    <ClCompile Include="src\Renderer\Cubemap.cpp" />
     <ClCompile Include="src\Renderer\Framebuffer.cpp" />
     <ClCompile Include="src\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Renderer\RGWindow.cpp" />
@@ -170,7 +180,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\Dev\Portfolio\Renegade Editor\src;D:\Dev\Portfolio\Renegade Engine\src\vendor;D:\Dev\Portfolio\Renegade Engine\src\vendor\spdlog\include;D:\Dev\Portfolio\Renegade Engine\src\vendor\GLFW\Include;D:\Dev\Portfolio\Renegade Engine\src\vendor\GLAD\include;D:\Dev\Portfolio\Renegade Engine\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Dev\Portfolio\Renegade Engine\src\vendor\Assimp\include;D:\Dev\Portfolio\Renegade Editor\src;D:\Dev\Portfolio\Renegade Engine\src\vendor;D:\Dev\Portfolio\Renegade Engine\src\vendor\spdlog\include;D:\Dev\Portfolio\Renegade Engine\src\vendor\GLFW\Include;D:\Dev\Portfolio\Renegade Engine\src\vendor\GLAD\include;D:\Dev\Portfolio\Renegade Engine\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -188,7 +198,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\Dev\Portfolio\Renegade Editor\src;D:\Dev\Portfolio\Renegade Engine\src\vendor;D:\Dev\Portfolio\Renegade Engine\src\vendor\spdlog\include;D:\Dev\Portfolio\Renegade Engine\src\vendor\GLFW\Include;D:\Dev\Portfolio\Renegade Engine\src\vendor\GLAD\include;D:\Dev\Portfolio\Renegade Engine\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Dev\Portfolio\Renegade Engine\src\vendor\Assimp\include;D:\Dev\Portfolio\Renegade Editor\src;D:\Dev\Portfolio\Renegade Engine\src\vendor;D:\Dev\Portfolio\Renegade Engine\src\vendor\spdlog\include;D:\Dev\Portfolio\Renegade Engine\src\vendor\GLFW\Include;D:\Dev\Portfolio\Renegade Engine\src\vendor\GLAD\include;D:\Dev\Portfolio\Renegade Engine\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>

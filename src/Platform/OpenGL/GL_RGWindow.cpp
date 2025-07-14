@@ -41,7 +41,7 @@ namespace RG
 	void GL_RGWindow::Clear(float R, float G, float B)
 	{
 		glClearColor(R, G, B, 1);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 	bool GL_RGWindow::ShouldClose()

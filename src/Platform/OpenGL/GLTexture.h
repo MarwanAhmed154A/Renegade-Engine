@@ -6,6 +6,7 @@ namespace RG
 {
 	class GLTexture : public Texture
 	{
+		REFLECTABLE_CLASS(GLTexture, Texture)
 	public:
 		GLTexture(const char* file);
 		GLTexture(unsigned char* data, int width, int height, int nrChannels);

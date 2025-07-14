@@ -127,6 +127,17 @@ namespace RG
 	}
 
 
+	void GLShader::SetVec4(unsigned int loc, const float* val)
+	{
+		glUniform4fv(loc, 1, val);
+	}
+
+	void GLShader::SetVec4(const char* name, const float* val)
+	{
+		glUniform4fv(glGetUniformLocation(ID, name), 1, val);
+	}
+
+
 
 	void GLShader::SetMat4(unsigned int loc, float* val)
 	{

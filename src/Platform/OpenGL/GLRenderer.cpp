@@ -4,6 +4,8 @@
 #include "Events/Event.h"
 #include "Scene/Entity.h"
 #include "Time/Time.h"
+#include "Model.h"
+#include "Input/Input.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -15,7 +17,63 @@
 #include <iostream>
 
 unsigned int VBO, VAO, EBO;
-RG::Shader* shader;
+RG::Shader *shader, *cubemapShader, *SSAAShader;
+RG::Framebuffer* buf;
+RG::Vec2 curViewSizeVec;
+
+float lastX = 800 / 2.0f;
+float lastY = 600 / 2.0f;
+float camMovSpeed = 1000.0f;
+bool firstMouse = true;
+
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 0.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+float yaw = -90.0f;
+float pitch = 0.0f;
+float fov = 45.0f;
+
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
+
+void UpdateCamera(double xposIn, double yposIn)
+{
+	float xMov = (Input::GetAxis(AxisCodes::Vertical));
+	float yMov = (Input::GetAxis(AxisCodes::Horizontal));
+
+	if(xMov || yMov)
+		cameraPos += glm::normalize((cameraFront * xMov + glm::cross(cameraFront, cameraUp) * yMov)) * (float)(camMovSpeed * Time::GetDeltaTime());
+
+	float xpos = static_cast<float>(xposIn);
+	float ypos = static_cast<float>(yposIn);
+
+	if (firstMouse) {
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+
+	float xoffset = xpos - lastX;
+	float yoffset = lastY - ypos;
+	lastX = xpos;
+	lastY = ypos;
+
+	float sensitivity = 0.1f;
+	xoffset *= sensitivity;
+	yoffset *= sensitivity;
+
+	yaw += xoffset;
+	pitch += yoffset;
+
+	pitch = std::clamp(pitch, -89.0f, 89.0f);
+
+	glm::vec3 direction;
+	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	direction.y = sin(glm::radians(pitch));
+	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	cameraFront = glm::normalize(direction);
+}
 
 namespace RG
 {
@@ -45,10 +103,10 @@ namespace RG
 
 		float vertices[] = {
 			// positions         // texture coords
-			 0.5f,  0.5f, 0.0f,  1.0f, 1.0f,   // top right
-			 0.5f, -0.5f, 0.0f,  1.0f, 0.0f,   // bottom right
-			-0.5f, -0.5f, 0.0f,  0.0f, 0.0f,   // bottom left
-			-0.5f,  0.5f, 0.0f,  0.0f, 1.0f    // top left 
+			 1.0f,  1.0f, 0.0f,  1.0f, 1.0f,   // top right
+			 1.0f, -1.0f, 0.0f,  1.0f, 0.0f,   // bottom right
+			-1.0f, -1.0f, 0.0f,  0.0f, 0.0f,   // bottom left
+			-1.0f,  1.0f, 0.0f,  0.0f, 1.0f    // top left 
 		};
 		unsigned int indices[] = {  // note that we start from 0!
 			0, 1, 3,  // first Triangle
@@ -74,16 +132,39 @@ namespace RG
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 		glEnableVertexAttribArray(1);
 
+		projection = glm::perspective(glm::radians(90.0f), (float)(1920 / 1080), 0.1f, 1000.0f);
+
+		cubemapShader = Shader::CreateShader("Shaders/cubemapVertex.shader", "Shaders/cubemapFragment.shader");
+		cubemapShader->Bind();
+		cubemapShader->SetMat4("projection", glm::value_ptr(projection));
+
 		//Setup default shader
 		shader = Shader::CreateShader("Shaders/vertex.shader", "Shaders/fragment.shader");
 		shader->Bind();
 
-		projection = glm::ortho(0.0f, 800.0f, 0.0f, 800.0f, 0.1f, 100.0f);
 		shader->SetMat4("projection", glm::value_ptr(projection));
 
 		m_nativeOutput = Framebuffer::Create(Vec2(800, 600));
+		buf            = Framebuffer::Create(Vec2(800, 600));
+
+
+		SSAAShader = Shader::CreateShader("Shaders/SSAAVertex.shader", "Shaders/SSAAFragment.shader");
 
 		glViewport(0, 0, 800, 600);
+
+		glEnable(GL_DEPTH_TEST);
+
+		//glEnable(GL_CULL_FACE);
+		//glCullFace(GL_BACK); // Default — culls back faces
+		//glFrontFace(GL_CCW); // Counter-clockwise = front (default in OpenGL)
+
+		//glPolygonMode(GL_FRONT, GL_FILL);
+		//glDepthMask(GL_TRUE);
+
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		glfwWindowHint(GLFW_DEPTH_BITS, 24);
 	}
 
 	void GLRenderer::RenderImpl()
@@ -93,23 +174,58 @@ namespace RG
 
 	void GLRenderer::RenderEntitiesImpl()
 	{
-		//Bind Shader and setup rojection matrix
-		shader->Bind();
-		shader->SetMat4("projection", glm::value_ptr(projection));
-
+		if (Input::GetMouseState() == MouseState::HIDDEN)
+			UpdateCamera(Input::GetCursorPos().x, Input::GetCursorPos().y);
+		else
+			firstMouse = true;
 		//setup view matrix
-		glm::mat4 view = glm::mat4(1.0f);
-		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -1.0f));
+		glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 		shader->SetMat4("view", glm::value_ptr(view));
 
-		m_nativeOutput->Bind();
-
+		buf->Bind();
+		glViewport(0, 0, curViewSizeVec.x * 4, curViewSizeVec.y * 4);
 		//clear framebuffer
-		glClearColor(1, 0, 1, 1);
-		glClear(GL_COLOR_BUFFER_BIT);
-		
+		glClearColor(0, 0, 1, 1);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		Transform* curTransform = nullptr;
+
+		glDepthMask(GL_FALSE);
+		glDepthFunc(GL_LEQUAL);
+
+
+		glActiveTexture(GL_TEXTURE0);
+
+		CubemapComponent* mapComp = nullptr;
+		for (int i = 0; i < ents->GetLength(); i++)
+		{
+			CubemapComponent* curMapComp = ents[0][i]->GetComponent<CubemapComponent>();
+			if (curMapComp)
+			{
+				cubemapShader->Bind();
+				cubemapShader->SetMat4("projection", glm::value_ptr(projection));
+
+				glm::mat4 viewMat = glm::mat4(glm::mat3(view));
+				cubemapShader->SetMat4("view", glm::value_ptr(viewMat));
+				cubemapShader->SetInt("skybox", 0);
+
+				curMapComp->map->Draw();
+				mapComp = curMapComp;
+			}
+		}
+
 		//Render cycle for all entities in scene
+		glDepthMask(GL_TRUE);
+		glDepthFunc(GL_LESS);
+		shader->Bind();
+		shader->SetMat4("projection", glm::value_ptr(projection));
+		shader->SetMat4("view", glm::value_ptr(view));
+		shader->SetInt("skybox", 4);
+		if (mapComp)
+		{
+			glActiveTexture(GL_TEXTURE4);
+			mapComp->map->BindTex();
+		}
 		for (int i = 0; i < ents->GetLength(); i++)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
@@ -126,12 +242,34 @@ namespace RG
 			shader->SetMat4("model", glm::value_ptr(model));
 
 			//check if entity has texComp and bind if so
-			TextureComponent* t = ents[0][i]->GetComponent<TextureComponent>();
-			if (t != nullptr)
-				t->Bind();
+			//TextureComponent* t = ents[0][i]->GetComponent<TextureComponent>();
+			ModelComponent* m = (*ents)[i]->GetComponent<ModelComponent>();
+			if (m != nullptr && m->m_model.get() && m->m_model.get()->GetPath().length() > 1)
+			{
+				//shader->SetVec4("solidBaseColor", m->m_model->)
+				m->Draw(shader);
+			}
 
-			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+			TextureComponent* t = ents[0][i]->GetComponent<TextureComponent>();
+			if (t != nullptr && t->m_texture.get() && t->m_texture.get()->GetPath().length() > 1)
+			{
+				t->Bind();
+				glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+			}
 		}
+
+		m_nativeOutput->Bind();
+		SSAAShader->Bind();
+		SSAAShader->SetInt("tex", 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, buf->GetTextureID());
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glViewport(0, 0, curViewSizeVec.x, curViewSizeVec.y);
+		glDisable(GL_DEPTH_TEST);
+		glBindVertexArray(VAO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glEnable(GL_DEPTH_TEST);
+
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
@@ -143,31 +281,24 @@ namespace RG
 	void GLRenderer::OnWindowResizeCallback(Event* event)
 	{
 		static double lastResizeTime = Time::GetTime();
+		//Convert to needed event type
+		OnWindowResizeEvent* e = event->SafeCastTo<OnWindowResizeEvent>();
 
 		//resize only once a second
-		if (Time::GetTime() - lastResizeTime > 1.0f)
+		if (e->size.x != 0.0f && e->size.y != 0.0f)
 		{
-			//Convert to needed event type
-			OnWindowResizeEvent* e = event->SafeCastTo<OnWindowResizeEvent>();
+			buf->Resize(Vec2(e->size.x * 4, e->size.y * 4));
 
 			//Resize framebuffer
-			m_nativeOutput->Resize(e->size);
-
+			m_nativeOutput->Resize(Vec2(e->size.x, e->size.y));
 			glViewport(0, 0, e->size.x, e->size.y);
 
 			//Get current size of window
 			float x = e->size.x, y = e->size.y;
-			projection = glm::ortho(0.0f, x, 0.0f, y, 0.1f, 100.0f);
 
-			//prepare resize log meesage
-			std::string s = "WINDOW RESIZED: ";
-			s += std::to_string((int)x);
-			s += ", " + std::to_string((int)y);
-
-			RG_CORE_INFO(s);
+			projection = glm::perspective(glm::radians(fov), (float)(x / y), 0.1f, 10000.0f);
+			curViewSizeVec = e->size;
 		}
-
-		lastResizeTime = Time::GetTime();
 	}
 
 }

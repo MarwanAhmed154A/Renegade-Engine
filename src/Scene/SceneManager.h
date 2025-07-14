@@ -13,5 +13,6 @@ namespace RG
 		static Scene* GetScene() { return m_scene; }
 	private:
 		static Scene* m_scene;
+		friend class Editor;
 	};
 }

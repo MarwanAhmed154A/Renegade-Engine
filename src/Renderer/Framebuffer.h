@@ -17,7 +17,7 @@ namespace RG
 		unsigned int GetTextureID() { return tex_id; }
 		unsigned int GetID() { return id; }
 	protected:
-		unsigned int id, tex_id;
+		unsigned int id, renderBuffer, tex_id, depth_id;
 		Vec2 m_size;
 	};
 }

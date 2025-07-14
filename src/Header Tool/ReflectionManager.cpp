@@ -11,7 +11,7 @@ namespace RG
 
 	ReflectedTypeData::ReflectedTypeData(std::string type_name) : type_name(type_name) {}
 
-	char ReflectionManager::AddType(std::string type_name, BaseSceneObject* e, BaseSceneObject* parent, int& typeID, int& parentTypeID)
+	char ReflectionManager::AddType(std::string type_name, BaseSceneObject* e, int& typeID)
 	{
 		//initialize lists as ptrs, safety from unkown static-init order and UB, on static defintion lines to avoid multiple assignments of value
 		static Vec<BaseSceneObject*>* types = s_types = new Vec<BaseSceneObject*>();
@@ -23,7 +23,6 @@ namespace RG
 		s_reflectionDataList->Push(data);
 
 		typeID = (int)s_types->GetLength() - 1;
-		parentTypeID = parent->s_TypeID;
 
 		return '0';
 	}
@@ -34,9 +33,14 @@ namespace RG
 		return '0';
 	}
 
-	Vec<BaseSceneObject*>* ReflectionManager::GetTypes()
+	Vec<BaseSceneObject*>*& ReflectionManager::GetTypes()
 	{
 		return s_types;
+	}
+
+	Vec<ReflectedTypeData*>*& ReflectionManager::GetTypesData()
+	{
+		return s_reflectionDataList;
 	}
 
 	Vec<ReflectedProp*>* ReflectionManager::GetVarsFromType(int ID)

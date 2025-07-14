@@ -1,9 +1,17 @@
 #pragma once
 
+class Editor;
+
 namespace RG
 {
 	class BaseSceneObject
 	{
+	protected:
+		friend Editor;
+		virtual void SetTypeID(int id)
+		{ 
+			s_TypeID = id;
+		}
 	public:
 		virtual int GetTypeID()
 		{
@@ -34,6 +42,12 @@ namespace RG
 			return new BaseSceneObject(*(BaseSceneObject*)binary);
 		}
 
+		virtual BaseSceneObject* GetDefaultCopy()
+		{
+			return new BaseSceneObject;
+		}
+
+		
 		static int s_TypeID;
 	};
 }

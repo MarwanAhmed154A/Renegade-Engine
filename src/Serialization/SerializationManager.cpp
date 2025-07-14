@@ -6,7 +6,8 @@
 #include "Scene/Entity.h"
 #include "Log.h"
 #include "Header Tool/ReflectionManager.h"
-#include "Player.h"
+#include "Asset.h"
+#include "ResourceManager.h"
 
 using namespace std;
 
@@ -21,49 +22,6 @@ namespace RG
 
 	void SerializationManager::Save(std::string file)
 	{
-		//ofstream out;
-		//out.open(file, ios::binary);
-		//
-		//int entitiesAmount = ents->GetLength();
-		//out.write(reinterpret_cast<const char*>(&entitiesAmount), sizeof(entitiesAmount));
-		//
-		//for (int i = 0; i < ents->GetLength(); i++)
-		//{
-		//	Entity* cur = ents[0][i];
-		//	int varByteSize = sizeof(*cur);
-		//	int nameLength = cur->GetName().length();
-		//	int componentAmount = cur->GetAmountOfComponents();
-		//	//set the binary array to the correct size for the variable
-		//	vector<unsigned char> binary;
-		//	binary.resize(varByteSize);
-		//
-		//	std::memcpy(binary.data(), cur, varByteSize);
-		//
-		//	out.write(reinterpret_cast<const char*>(&varByteSize), sizeof(varByteSize));
-		//	// 
-		//	//out.write(reinterpret_cast<const char*>(&nameLength), 4);
-		//	//out.write(cur->GetName().c_str(), nameLength);
-		//	// 
-		//	out.write(reinterpret_cast<const char*>(binary.data()), varByteSize);
-		//	
-		//	int curCompSize;
-		//	Component* curComp;
-		//	for (int j = 0; j < componentAmount; j++)
-		//	{
-		//		curComp = cur->GetComponent(j);
-		//		curCompSize = curComp->GetSize();
-		//
-		//		std::string compName = ReflectionManager::GetTypeName(curComp->GetTypeID());
-		//		int nameLength = compName.length();
-		//		out.write((const char*)(&nameLength), 4);
-		//		out.write(compName.c_str(), nameLength);
-		//
-		//		out.write((const char*)(&curCompSize), sizeof(curCompSize));
-		//		out.write((const char*)(curComp), curCompSize);
-		//	}
-		//}
-		//out.close();
-
 		ofstream out;
 		out.open(file, ios::binary);
 		
@@ -85,6 +43,16 @@ namespace RG
 			int amountOfComps = comps->size();
 			out.write((const char*)&amountOfComps, 4);
 
+			vector<ReflectedProp*>* props = (vector<ReflectedProp*>*)ReflectionManager::GetVarsFromType(curEnt->GetTypeID());
+			for (ReflectedProp* prop : *props)
+			{
+				if (prop->type == InspectableType::Asset)
+				{
+					std::shared_ptr<RG::Asset>* asset = ReflectionManager::GetVarFromObject<std::shared_ptr<Asset>>(prop->name, curEnt);
+					SaveAsset(prop, curEnt, out);
+				}
+			}
+
 			for (Component* curComp : *comps)
 			{
 				SaveString(ReflectionManager::GetTypeName(curComp->GetTypeID()), out);
@@ -92,81 +60,23 @@ namespace RG
 				int compSize = curEnt->GetSize();
 				out.write((char*)&compSize, 4);
 				out.write((char*)curComp, compSize);
+
+				vector<ReflectedProp*>* props = (vector<ReflectedProp*>*)ReflectionManager::GetVarsFromType(curComp->GetTypeID());
+				for (ReflectedProp* prop : *props)
+				{
+					if (prop->type == InspectableType::Asset)
+					{
+						
+						std::shared_ptr<RG::Asset>* asset = ReflectionManager::GetVarFromObject<std::shared_ptr<Asset>>(prop->name, curComp);
+						SaveAsset(prop, curComp, out);
+					}
+				}
 			}
 		}
-		//Entity* curEnt = 
 	}
 
 	void SerializationManager::Load(std::string file)
 	{
-		//ifstream in;
-		//in.open(file, ios::binary | ios::ate);
-		//streamsize s = in.tellg();
-		//in.close();
-		//
-		//in.open(file, ios::binary);
-		//
-		//int entitiesAmount;
-		//in.read((char*)(&entitiesAmount), sizeof(entitiesAmount));
-		//
-		//for (int i = 0; i < entitiesAmount; i++)
-		//{
-		//	int varByteSize = 0, nameLength = 0;
-		//
-		//	//binary array
-		//	char* binary = nullptr;
-		//	char* varByteSizeChar = new char[4], * nameLengthChar = new char[4];
-		//	char* name;
-		//
-		//	in.read(varByteSizeChar, 4);
-		//	memcpy(&varByteSize, varByteSizeChar, 4);
-		//
-		//	//in.read(nameLengthChar, 4);
-		//	//nameLength = *(int*)(nameLengthChar);
-		//	//name = new char[nameLength];
-		//	//in.read(name, nameLength);
-		//
-		//	//RG_CORE_ERROR(name)
-		//	//RG_CORE_ERROR(nameLength)
-		//
-		//	binary = new char[varByteSize];
-		//
-		//	in.read(binary, varByteSize);
-		//
-		//	Entity* var = (Entity*)binary;//(Entity*)((Entity*)ReflectionManager::GetType("Entity"))->GetCopy(binary);
-		//
-		//	int AmountOfComps = var->GetAmountOfComponents();
-		//	int curCompSize;
-		//	new (&var->m_components) Vec<Component*>();
-		//	for (int j = 0; j < AmountOfComps; j++)
-		//	{
-		//		int compNameLength = 0;
-		//		in.read((char*)(&compNameLength), 4);
-		//		char* compName = new char[compNameLength + 1];
-		//		in.read(compName, compNameLength);
-		//		compName[compNameLength] = '\0';
-		//
-		//		//var->DeleteComponent(j);
-		//		in.read((char*)(&curCompSize), sizeof(curCompSize));
-		//		char* curCompBinary = new char[curCompSize];
-		//
-		//		in.read((char*)(curCompBinary), curCompSize);
-		//		BaseSceneObject* curComp = ((Component*)ReflectionManager::GetType(compName))->GetCopy(curCompBinary);
-		//		//ReflectionManager::
-		//		//*curComp = *(Transform*)(curCompBinary);
-		//
-		//		//memcpy(curComp, curCompBinary, curComp->GetTypeI)
-		//		var->AddComponent((Component*)curComp);
-		//	}
-		//	var->transform = (Transform*)var->GetComponent(0);
-		//
-		//	//string x = name;
-		//	//var->SetName(x);
-		//
-		//	ents->push_back(var);
-		//}
-		//in.close();
-
 		ifstream in;
 		in.open(file, ios::binary);
 		
@@ -196,7 +106,19 @@ namespace RG
 			Vec<Component*>* comps = &(curEnt->m_components);
 			new (comps)(Vec<Component*>);
 			
-			curEnt = (Entity*)ReflectionManager::GetType(type)->GetCopy((char*)curEnt); //Get entity* with correct vptr
+			curEnt = (Entity*)ReflectionManager::GetType(type)->GetCopy(entBinary);
+			delete[] entBinary;
+
+			vector<ReflectedProp*>* props = (vector<ReflectedProp*>*)ReflectionManager::GetVarsFromType(curEnt->GetTypeID());
+			for (ReflectedProp* prop : *props)
+			{
+				if (prop->type == InspectableType::Asset)
+				{
+					std::shared_ptr<RG::Asset>* assetPtr = ReflectionManager::GetVarFromObject<std::shared_ptr<Asset>>(prop->name, curEnt);
+					new (assetPtr) std::shared_ptr<RG::Asset>;
+					*assetPtr = LoadAsset(in);
+				}
+			}
 
 			int amountOfComps = 0;
 			in.read((char*)&amountOfComps, 4);
@@ -211,7 +133,20 @@ namespace RG
 				char* compBinary = new char[compSize];
 				in.read(compBinary, compSize);
 
+				vector<ReflectedProp*>* props = (vector<ReflectedProp*>*)ReflectionManager::GetVarsFromType(ReflectionManager::GetType(compType)->GetTypeID());
+				for (ReflectedProp* prop : *props)
+				{
+					if (prop->type == InspectableType::Asset)
+					{
+						std::shared_ptr<RG::Asset>* assetPtr = (std::shared_ptr<RG::Asset>*)((char*)compBinary + prop->offset);
+						new (assetPtr) std::shared_ptr<RG::Asset>;
+						*assetPtr = LoadAsset(in);
+						int x = 0;
+					}
+				}
+
 				Component* curComp = (Component*)ReflectionManager::GetType(compType)->GetCopy(compBinary); //Get component* with correct vptr
+
 
 				curEnt->AddComponent(curComp);
 			}
@@ -223,7 +158,7 @@ namespace RG
 
 	void SerializationManager::OnSceneInitCallback(Event* e)
 	{
-		ents = (std::vector<Entity*>*)((OnSceneInitEvent*)e)->vec;
+		ents = (std::vector<Entity*>*)e->SafeCastTo<OnSceneInitEvent>()->vec;
 	}
 
 	/// <summary>
@@ -249,11 +184,63 @@ namespace RG
 		int size = 0;
 		file.read((char*)&size, 4);
 
-		char* str = new char[size];
-		file.read(str, size);
-		str[size] = '\0';
+		char* c_str = new char[size];
+		file.read(c_str, size);
+		c_str[size] = '\0';
 
-		return str;
+		std::string s = std::move(c_str);
+
+		return s;
+	}
+
+	void SerializationManager::SaveAsset(ReflectedProp* prop, BaseSceneObject* obj, std::ofstream& file)
+	{
+		if (prop->type == InspectableType::Asset)
+		{
+			RG::Asset* asset = ReflectionManager::GetVarFromObject<std::shared_ptr<Asset>>(prop->name, obj)->get();
+
+			//if the asset has different versions for different APIs save the parent (base) type name instead
+			if (asset->GetParentTypeID() == Cubemap::s_GetTypeID())
+			{
+				SaveString(ReflectionManager::GetTypeName(asset->GetParentTypeID()), file);
+				for (int i = 0; i < 6; i++)
+					SaveString(((Cubemap*)asset)->textures[i], file);
+				return;
+			}
+			else if (asset->GetParentTypeID() != Asset::s_GetTypeID())
+			{
+				SaveString(ReflectionManager::GetTypeName(asset->GetParentTypeID()), file);
+				RG_CORE_INFO(asset->GetParentTypeID())
+			}
+			else
+				SaveString(ReflectionManager::GetTypeName(asset->GetTypeID()),       file);
+
+			SaveString(asset->GetPath(), file);
+		}
+	}
+
+	shared_ptr<Asset> SerializationManager::LoadAsset(std::ifstream& file)
+	{
+		string type_name = LoadStringCurSize(file);
+		string path      = LoadStringCurSize(file);
+
+		std::shared_ptr<Asset> asset;
+
+		if (type_name == "Texture")
+			asset = ResourceManager::Create(path.c_str());
+		else if (type_name == "Model")
+			asset = ResourceManager::CreateModel(path.c_str());
+		else if (type_name == "Cubemap")
+		{
+			Vec<std::string> paths;
+			paths.Push(path);
+			for (int i = 0; i < 5; i++)
+				paths.Push(LoadStringCurSize(file));
+
+			asset = std::shared_ptr<Asset>(Cubemap::Create(paths));
+		}
+
+		return asset;
 	}
 
 }

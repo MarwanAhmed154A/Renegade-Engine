@@ -10,13 +10,16 @@ namespace RG
 	class Texture : public Asset
 	{
 	public:
+		REFLECTABLE_CLASS(Texture, Asset)
+
+		Texture() {}
 		static std::shared_ptr<Texture> CreateTexture(const char* file);
 		static std::shared_ptr<Texture> CreateTexture(unsigned char* data, int width, int height, int nrChannels);
 
-		virtual void Bind() = 0;
-		virtual void Unload() = 0;
+		virtual void Bind() {}
+		virtual void Unload() {}
 
-		virtual unsigned int GetID() = 0;
+		virtual unsigned int GetID() { return texture; }
 
 	protected:
 		friend class TextureComponent;

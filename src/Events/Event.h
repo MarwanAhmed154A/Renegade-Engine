@@ -102,6 +102,8 @@ namespace RG
 		}
 
 		static void Invoke(Event* e);
+
+		Vec<Vec<std::unique_ptr<CallbackBase>>>* GetCallbacks() { return &callbacks; }
 	private:
 		static Vec<Vec<std::unique_ptr<CallbackBase>>> callbacks;
 	};

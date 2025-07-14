@@ -8,6 +8,8 @@
 #include "BaseSceneObject.h"
 #include "Header Tool/ReflectionManager.h"
 #include "Platform/OpenGL/GLTexture.h"
+#include "Renderer/Cubemap.h"
+
 //#include "Scene/Entity.h"
 
 namespace RG
@@ -38,7 +40,7 @@ namespace RG
 	class TextureComponent : public Component
 	{
 	private:
-		REFLECTABLE_CLASS(TextureComponent, Component);
+		REFLECTABLE_CLASS(TextureComponent, Component)
 
 		std::shared_ptr<Texture> m_texture;
 		REFLECTED_PRIV_DECL(InspectableType::Asset, TextureComponent, m_texture)
@@ -51,12 +53,29 @@ namespace RG
 		void Bind();
 	};
 
+	class Model;
+	class ModelComponent : public Component
+	{
+	private:
+		REFLECTABLE_CLASS(ModelComponent, Component)
+
+		std::shared_ptr<Model> m_model;
+		REFLECTED_PRIV_DECL(InspectableType::Asset, ModelComponent, m_model)
+	public:
+		ModelComponent();
+		ModelComponent(const char* path);
+
+		void SetModel(const char* path) {}
+		void Bind();
+		void Draw(class Shader*);
+	};
+
 	class Transform : public Component
 	{
 		REFLECTABLE_CLASS(Transform, Component)
 
 
-		Transform() : Position(145, 643, 0) {}
+		Transform() : Position(0, 0, 0), LocalScale(100, 100, 100) {}
 	public:
 		void Translate(Vec3 vec) { Position   += vec; }
 		void Rotate(Vec3 vec)    { Rotation   += vec; }
@@ -71,5 +90,12 @@ namespace RG
 	public:
 		Vec<Texture*> textures;
 	private:
+	};
+
+	class CubemapComponent : public Component
+	{
+		REFLECTABLE_CLASS(CubemapComponent, Component)
+	public:
+		Cubemap* map;
 	};
 }

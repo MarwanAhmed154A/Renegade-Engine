@@ -4,6 +4,8 @@
 #include <string>
 #include "BaseSceneObject.h"
 
+class Editor;
+
 namespace RG
 {
 	enum class InspectableType
@@ -34,10 +36,11 @@ namespace RG
 	class ReflectionManager
 	{
 	public:
-		static char AddType(std::string type_name, BaseSceneObject* e, BaseSceneObject* parent, int& typeID, int& parentTypeID);
+		static char AddType(std::string type_name, BaseSceneObject* e, int& typeID);
 		static char AddProp(std::string name, int offset, InspectableType type, int ID);
 
-		static Vec<BaseSceneObject*>* GetTypes();
+		static Vec<BaseSceneObject*>*& GetTypes();
+		static Vec<ReflectedTypeData*>*& GetTypesData();
 		static Vec<ReflectedProp*>* GetVarsFromType(int ID);
 
 		static const std::string GetTypeName(int ID);
@@ -70,14 +73,16 @@ namespace RG
 		}
 
 	private:
-		static Vec<BaseSceneObject*>* s_types; //this keeps copies of the objects
+		friend Editor;
+		friend class Application;
+		static Vec<BaseSceneObject*>*   s_types; //this keeps copies of the objects
 		static Vec<ReflectedTypeData*>* s_reflectionDataList; //this stores per-type metadata
 	};
 }
 
 using namespace RG;
-#define REFLECTABLE_CLASS(x, parent)  protected: static int s_parentTypeID; protected: static int s_TypeID; static int s_Size;  static char x##_adder; public: typedef parent Super; virtual int GetTypeID() override {return s_TypeID;} virtual int GetParentTypeID() override {return s_parentTypeID;} virtual BaseSceneObject* GetCopy(char* binary) {return new x##(*(x##*)binary);} virtual int GetSize() override {return s_Size;} static int s_GetTypeID() {return s_TypeID;} static int s_GetParentTypeID() {return s_parentTypeID;}
-#define REFLECT_REGISTER_TYPE(x) int x##::s_parentTypeID = 0; int x##::s_TypeID = 0; char x::x##_adder = ReflectionManager::AddType(#x, new x, new x##::Super, s_TypeID, s_parentTypeID); int x##::s_Size = sizeof(x);
-#define REFLECT_PROP(type, x, v) static char  v##_in_##x##      = ReflectionManager::AddProp(#v, offsetof(x, v), type, x##::s_GetTypeID());
-#define REFLECTED_PRIV_DECL(type, x, v) static char v##_in_##x##;
-#define REFLECT_PRIV_PROP(type, x, v) char x##::##v##_in_##x##  = ReflectionManager::AddProp(#v, offsetof(x, v), type, x##::s_GetTypeID());
+#define REFLECTABLE_CLASS(thisClass, parent)  protected: static int s_TypeID; static int s_Size;  static char thisClass##_adder; virtual void SetTypeID(int id) {s_TypeID = id;} public: typedef parent Super; virtual int GetTypeID() override {return s_TypeID;} virtual int GetParentTypeID() override {return Super##::s_GetTypeID();} virtual BaseSceneObject* GetCopy(char* binary) {return new thisClass##(*(thisClass##*)binary);} virtual int GetSize() override {return s_Size;} static int s_GetSize() {return s_Size;} static int s_GetTypeID() {return s_TypeID;} static int s_GetParentTypeID() {return Super##::s_GetTypeID();} virtual BaseSceneObject* GetDefaultCopy() {return new thisClass##;}
+#define REFLECT_REGISTER_TYPE(thisClass) int thisClass##::s_TypeID = 0; char thisClass::thisClass##_adder = ReflectionManager::AddType(#thisClass, new thisClass, s_TypeID); int thisClass##::s_Size = sizeof(thisClass);
+#define REFLECT_PROP(type, thisClass, thisProp) static char  thisProp##_in_##thisClass##      = ReflectionManager::AddProp(#thisProp, offsetof(thisClass, thisProp), type, thisClass##::s_GetTypeID());
+#define REFLECTED_PRIV_DECL(type, thisClass, thisProp) static char thisProp##_in_##thisClass;
+#define REFLECT_PRIV_PROP(type, thisClass, thisProp) char thisClass##::thisProp##_in_##thisClass##  = ReflectionManager::AddProp(#thisProp, offsetof(thisClass, thisProp), type, thisClass##::s_GetTypeID());

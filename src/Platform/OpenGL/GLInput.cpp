@@ -12,36 +12,41 @@ namespace RG
 		: window_handle((GLFWwindow*)window->GetNativeWindow())
 	{
 		glKeys = new Key[NUMBER_OF_KEYS];
-		glKeys[KeyCodes::W].keyCode = GLFW_KEY_W;
-		glKeys[KeyCodes::A].keyCode = GLFW_KEY_A;
-		glKeys[KeyCodes::S].keyCode = GLFW_KEY_S;
-		glKeys[KeyCodes::D].keyCode = GLFW_KEY_D;
-		glKeys[KeyCodes::UP].keyCode = GLFW_KEY_UP;
-		glKeys[KeyCodes::DOWN].keyCode = GLFW_KEY_DOWN;
-		glKeys[KeyCodes::LEFT].keyCode = GLFW_KEY_LEFT;
-		glKeys[KeyCodes::RIGHT].keyCode = GLFW_KEY_RIGHT;
-		glKeys[KeyCodes::ESC].keyCode = GLFW_KEY_ESCAPE;
-		glKeys[KeyCodes::ENTER].keyCode = GLFW_KEY_ENTER;
+		glKeys[KeyCodes::W].keyCode         = GLFW_KEY_W;
+		glKeys[KeyCodes::A].keyCode         = GLFW_KEY_A;
+		glKeys[KeyCodes::S].keyCode         = GLFW_KEY_S;
+		glKeys[KeyCodes::D].keyCode         = GLFW_KEY_D;
+		glKeys[KeyCodes::UP].keyCode        = GLFW_KEY_UP;
+		glKeys[KeyCodes::DOWN].keyCode      = GLFW_KEY_DOWN;
+		glKeys[KeyCodes::LEFT].keyCode      = GLFW_KEY_LEFT;
+		glKeys[KeyCodes::RIGHT].keyCode     = GLFW_KEY_RIGHT;
+		glKeys[KeyCodes::ESC].keyCode       = GLFW_KEY_ESCAPE;
+		glKeys[KeyCodes::ENTER].keyCode     = GLFW_KEY_ENTER;
 		glKeys[KeyCodes::LEFT_CTRL].keyCode = GLFW_KEY_LEFT_CONTROL;
+		glKeys[KeyCodes::R].keyCode         = GLFW_KEY_R;
 	}
 
 	void GLInput::UpdateImpl()
 	{
 		for (int i = 0; i < NUMBER_OF_KEYS; i++)
 		{
-			if (glfwGetKey(window_handle, glKeys[i].keyCode) && glKeys[i].state == KeyState::RELEASED)
-			{
+			if (glfwGetKey(window_handle, glKeys[i].keyCode))
 				glKeys[i].state = KeyState::PRESSED;
-				glKeys[i].pressTime = Time::GetTime();
-			}
-			else if (glfwGetKey(window_handle, glKeys[i].keyCode) && glKeys[i].state == KeyState::PRESSED && Time::GetTime() - glKeys[i].pressTime < .1)
-				glKeys[i].state = KeyState::WAITING;
-			else if (glfwGetKey(window_handle, glKeys[i].keyCode) && glKeys[i].state == KeyState::WAITING && Time::GetTime() - glKeys[i].pressTime >= .1)
-				glKeys[i].state = KeyState::REPEATED;
-			else if (!glfwGetKey(window_handle, glKeys[i].keyCode))
-				glKeys[i].state = KeyState::RELEASED;
 			else
-				continue;
+				glKeys[i].state = KeyState::RELEASED;
+			//if (glfwGetKey(window_handle, glKeys[i].keyCode) && glKeys[i].state == KeyState::RELEASED)
+			//{
+			//	glKeys[i].state = KeyState::PRESSED;
+			//	glKeys[i].pressTime = Time::GetTime();
+			//}
+			//else if (glfwGetKey(window_handle, glKeys[i].keyCode) && glKeys[i].state == KeyState::PRESSED && Time::GetTime() - glKeys[i].pressTime < .1)
+			//	glKeys[i].state = KeyState::WAITING;
+			//else if (glfwGetKey(window_handle, glKeys[i].keyCode) && glKeys[i].state == KeyState::WAITING && Time::GetTime() - glKeys[i].pressTime >= .1)
+			//	glKeys[i].state = KeyState::REPEATED;
+			//else if (!glfwGetKey(window_handle, glKeys[i].keyCode))
+			//	glKeys[i].state = KeyState::RELEASED;
+			//else
+			//	continue;
 		}
 		
 	}
@@ -66,17 +71,28 @@ namespace RG
 
 	int GLInput::GetAxisImpl(AxisCodes axisCode)
 	{
-		int val = (axisCode == AxisCodes::Vertical) ? (glKeys[W].state != KeyState::RELEASED && glKeys[W].state != KeyState::WAITING)
-			+ ((glKeys[S].state != KeyState::RELEASED && glKeys[S].state != KeyState::WAITING) * -1)
-			: (glKeys[D].state != KeyState::RELEASED && glKeys[D].state != KeyState::WAITING)
-			+ ((glKeys[A].state != KeyState::RELEASED && glKeys[A].state != KeyState::WAITING) * -1);
+		int val = 0;
+		if (axisCode == AxisCodes::Vertical)
+		{
+			if (GetKeyImpl(W))
+				val = 1;
+			else if (GetKeyImpl(S))
+				val = -1;
+		}
+		else if (axisCode == AxisCodes::Horizontal)
+		{
+			if (GetKeyImpl(D))
+				val = 1;
+			else if (GetKeyImpl(A))
+				val = -1;
+		}
 		return val;
 	}
 
-	//Vec2 GLInput::GetCursorPosImpl()
-	//{
-	//	double x, y;
-	//	glfwGetCursorPos(window_handle, &x, &y);
-	//	return Vec2((float)x, (float)y);
-	//}
+	Vec2 GLInput::GetCursorPosImpl()
+	{
+		double x, y;
+		glfwGetCursorPos(window_handle, &x, &y);
+		return Vec2((float)x, (float)y);
+	}
 }

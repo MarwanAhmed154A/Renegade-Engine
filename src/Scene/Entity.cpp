@@ -3,15 +3,16 @@
 #include "Header Tool/ReflectionManager.h"
 
 REFLECT_REGISTER_TYPE(Entity)
+REFLECT_PRIV_PROP(InspectableType::String, Entity, m_name)
 
 namespace RG
 {
-	Entity::Entity() : m_parent(nullptr)//, m_name("Entity")
+	Entity::Entity() : m_parent(nullptr), m_name("Entity")
 	{
 		transform = (Transform*)(m_components.Push(new Transform));
 	}
 
-	Entity::Entity(std::string name) : m_parent(nullptr)//, m_name(name)
+	Entity::Entity(std::string name) : m_parent(nullptr), m_name(name)
 	{
 		transform = (Transform*)(m_components.Push(new Transform));
 	}

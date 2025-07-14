@@ -14,3 +14,5 @@ namespace RG
 		return  std::make_shared<GLTexture>(data, width, height, nrChannels);
 	}
 }
+
+REFLECT_REGISTER_TYPE(Texture)

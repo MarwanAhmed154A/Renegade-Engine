@@ -7,8 +7,6 @@
 #include <string>
 #include <memory>
 
-//#define GEN(x, parent) protected: static int s_parentTypeID; static int s_TypeID; static int s_Size; static ReflectedTypeData* x##_adder; public: typedef parent Super; virtual int GetTypeID() override {return s_TypeID;} virtual BaseSceneObject* GetCopy(char* binary) {return new x##(*(x##*)binary);} virtual int GetSize() override {return s_Size;} static int s_GetTypeID() {return s_TypeID;}
-
 namespace RG
 {
 	class Entity : public BaseSceneObject
@@ -66,7 +64,11 @@ namespace RG
 		{
 			for (int i = 0; i < m_components.GetLength(); i++)
 				if (typeid(T) == typeid(*m_components[i]))
+				{
+					delete m_components[i];
 					m_components.Delete(i);
+
+				}
 		}
 
 
@@ -79,5 +81,7 @@ namespace RG
 		Vec<Component*> m_components;
 		friend class Scene;
 		friend class SerializationManager;
+
+		REFLECTED_PRIV_DECL(InspectableType::String, Entity, m_name)
 	};
 }

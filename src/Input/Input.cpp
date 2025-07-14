@@ -1,9 +1,10 @@
 #include "Input.h"
 #include "Renderer/RGWindow.h"
-
+#include "Maths/Vec2.h"
 #include "Platform/OpenGL/GLInput.h"
 
 RG::Input* RG::Input::s_handle;
+RG::MouseState RG::Input::mouseState;
 
 namespace RG
 {
@@ -27,8 +28,14 @@ namespace RG
 		return s_handle->GetKeyPressedImpl(keyCode);
 	}
 
+	MouseState Input::GetMouseState()
+	{
+		return mouseState;
+	}
+
 	void Input::SetMouseState(MouseState state)
 	{
+		mouseState = state;
 		s_handle->SetMouseStateImpl(state);
 	}
 
@@ -37,8 +44,8 @@ namespace RG
 		return s_handle->GetAxisImpl(axisCode);
 	}
 
-	//Vec2 Input::GetCursorPos()
-	//{
-	//	return s_handle->GetCursorPosImpl();
-	//}
+	Vec2 Input::GetCursorPos()
+	{
+		return s_handle->GetCursorPosImpl();
+	}
 }
