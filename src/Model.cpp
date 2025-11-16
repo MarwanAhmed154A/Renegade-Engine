@@ -1,7 +1,11 @@
 #include "Model.h"
 #include "ResourceManager.h"
+#include "Animation/Animation.h"
 
 #include <iostream>
+#include <GLM/glm.hpp>
+#include <GLM/gtc/matrix_transform.hpp>
+#include <GLM/gtc/type_ptr.hpp>
 
 REFLECT_REGISTER_TYPE(Model)
 
@@ -39,6 +43,47 @@ namespace RG
 
 		// process ASSIMP's root node recursively
 		processNode(scene->mRootNode, scene);
+
+		if (scene->HasAnimations())
+		{
+			cout << "HasAnims!!!\n";
+			aiNodeAnim* channel = scene->mAnimations[0]->mChannels[0];
+			NodeAnimation animChannel;
+
+			animChannel.positions.Resize(channel->mNumPositionKeys);
+			animChannel.Rotations.Resize(channel->mNumRotationKeys);
+			animChannel.scales.Resize(channel->mNumScalingKeys);
+
+			for (unsigned int j = 0; j < channel->mNumPositionKeys; j++) {
+				auto key = channel->mPositionKeys[j];
+				double timeSec = key.mTime / 75;
+				aiVector3D pos = key.mValue;
+
+				animChannel.positions[j].timeStamp = timeSec;
+				animChannel.positions[j].pos = Vec3(pos.x, pos.y, pos.z);
+			}
+
+			for (unsigned int j = 0; j < channel->mNumRotationKeys; j++) {
+				auto key = channel->mRotationKeys[j];
+				double timeSec = key.mTime / 75;
+				aiQuaternion rot = key.mValue;
+
+				animChannel.Rotations[j].timeStamp = timeSec;
+				glm::vec3 rotVec = glm::eulerAngles(glm::quat(rot.x, rot.y, rot.z, rot.w));
+				animChannel.Rotations[j].rot = Vec3(rotVec.x, rotVec.y, rotVec.z);
+			}
+
+			for (unsigned int j = 0; j < channel->mNumScalingKeys; j++) {
+				auto key = channel->mScalingKeys[j];
+				double timeSec = key.mTime / 75;
+				aiVector3D scale = key.mValue;
+
+				animChannel.scales [j] .timeStamp = timeSec;
+				animChannel.scales[j].scale = Vec3(scale.x, scale.y, scale.z);
+			}
+
+			anim.channels.Push(animChannel);
+		}
 	}
 
 	void Model::processNode(aiNode* node, const aiScene* scene)
@@ -136,7 +181,7 @@ namespace RG
 		}
 
 		mat.normal   = loadMaterialTextures(material, aiTextureType_NORMALS, "texture_normal");
-
+		
 		mat.metallicRoughness = loadMaterialTextures(material, aiTextureType_UNKNOWN, "texture_metallic_roughness");
 
 		if (!mat.metallicRoughness)
@@ -144,12 +189,14 @@ namespace RG
 			mat.metallic  = loadMaterialKeyValue(material, AI_MATKEY_METALLIC_FACTOR);
 			mat.roughness = loadMaterialKeyValue(material, AI_MATKEY_ROUGHNESS_FACTOR);
 		}
-
+		
 		mat.alphaMap = loadMaterialTextures(material, aiTextureType_OPACITY, "texture_opacity");
 		if (!mat.alphaMap)
 		{
 			mat.alpha = loadMaterialKeyValue(material, AI_MATKEY_OPACITY);
 		}
+		
+
 		//mat.specualr = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_diffuse");
 		//mat.height = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_diffuse");
 		//// 2. specular maps

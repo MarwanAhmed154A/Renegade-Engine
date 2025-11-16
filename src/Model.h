@@ -10,6 +10,7 @@
 
 #include "Components.h"
 #include "Header Tool/ReflectionManager.h"
+#include "Animation/Animation.h"
 
 using namespace std;
 
@@ -32,6 +33,7 @@ namespace RG
 		aiColor4D loadMaterialSolidColor(aiMaterial* mat);
 		float loadMaterialKeyValue(aiMaterial* mat, const char* pKey, unsigned int type, unsigned int idx);
 	public:
+		Animation anim;
 		~Model();
 
 		Model()

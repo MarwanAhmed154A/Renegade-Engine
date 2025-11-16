@@ -66,7 +66,6 @@ namespace RG
 				{
 					if (prop->type == InspectableType::Asset)
 					{
-						
 						std::shared_ptr<RG::Asset>* asset = ReflectionManager::GetVarFromObject<std::shared_ptr<Asset>>(prop->name, curComp);
 						SaveAsset(prop, curComp, out);
 					}
@@ -146,7 +145,7 @@ namespace RG
 				}
 
 				Component* curComp = (Component*)ReflectionManager::GetType(compType)->GetCopy(compBinary); //Get component* with correct vptr
-
+				curComp->SetParent(curEnt);
 
 				curEnt->AddComponent(curComp);
 			}

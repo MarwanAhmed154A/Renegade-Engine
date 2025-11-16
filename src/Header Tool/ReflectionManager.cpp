@@ -11,7 +11,7 @@ namespace RG
 
 	ReflectedTypeData::ReflectedTypeData(std::string type_name) : type_name(type_name) {}
 
-	char ReflectionManager::AddType(std::string type_name, BaseSceneObject* e, int& typeID)
+	char ReflectionManager::AddType(std::string type_name, BaseSceneObject* e)
 	{
 		//initialize lists as ptrs, safety from unkown static-init order and UB, on static defintion lines to avoid multiple assignments of value
 		static Vec<BaseSceneObject*>* types = s_types = new Vec<BaseSceneObject*>();
@@ -22,7 +22,7 @@ namespace RG
 		s_types->Push(e);
 		s_reflectionDataList->Push(data);
 
-		typeID = (int)s_types->GetLength() - 1;
+		e->SetTypeID((int)s_types->GetLength() - 1);
 
 		return '0';
 	}

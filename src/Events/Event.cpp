@@ -3,7 +3,7 @@
 
 using namespace RG;
 
-Vec<Vec<std::unique_ptr<CallbackBase>>> EventManager::callbacks;
+Vec<Vec<std::unique_ptr<CallbackBase>>>* EventManager::callbacks;
 
 namespace RG
 {
@@ -34,20 +34,29 @@ namespace RG
 	}
 	//
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//OnRigidbodyCreatedEvent
+	OnRigidbodyCreatedEvent::OnRigidbodyCreatedEvent()
+	{
+		type = EventType::OnRigidbodyCreated;
+	}
+	//
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//EventManager
 	void EventManager::Init()
 	{
+		callbacks = new Vec<Vec<std::unique_ptr<CallbackBase>>>;
 		for (int i = 0; i < 20; i++)
-			callbacks.PushMove(Vec<std::unique_ptr<CallbackBase>>());
+			callbacks->PushMove(Vec<std::unique_ptr<CallbackBase>>());
 	}
 	
 	void EventManager::Invoke(Event* e)
 	{
-		int funcsAmount = callbacks[e->type].GetLength();
+		int funcsAmount = (*callbacks)[e->type].GetLength();
 
 		for (int i = 0; i < funcsAmount; i++)
-			callbacks[e->type][i].get()->DoFunc(e);
+			(*callbacks)[e->type][i].get()->DoFunc(e);
 	}
+
 
 	//
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -24,7 +24,8 @@ namespace RG
 		virtual void Start() {}
 		virtual void Tick() {}
 
-		Entity* GetParent() { return m_parentPtr; }
+		Entity* GetParent()               { return m_parentPtr;   }
+		void    SetParent(Entity* parent) { m_parentPtr = parent; }
 	protected:
 		friend class Entity;
 		template<typename T>

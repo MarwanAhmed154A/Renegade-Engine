@@ -23,7 +23,7 @@ RG::Vec2 curViewSizeVec;
 
 float lastX = 800 / 2.0f;
 float lastY = 600 / 2.0f;
-float camMovSpeed = 1000.0f;
+float camMovSpeed = 100.0f;
 bool firstMouse = true;
 
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -154,10 +154,6 @@ namespace RG
 
 		glEnable(GL_DEPTH_TEST);
 
-		//glEnable(GL_CULL_FACE);
-		//glCullFace(GL_BACK); // Default — culls back faces
-		//glFrontFace(GL_CCW); // Counter-clockwise = front (default in OpenGL)
-
 		//glPolygonMode(GL_FRONT, GL_FILL);
 		//glDepthMask(GL_TRUE);
 
@@ -185,14 +181,14 @@ namespace RG
 		buf->Bind();
 		glViewport(0, 0, curViewSizeVec.x * 4, curViewSizeVec.y * 4);
 		//clear framebuffer
-		glClearColor(0, 0, 1, 1);
+		glClearColor(0, 0, 0, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		Transform* curTransform = nullptr;
 
-		glDepthMask(GL_FALSE);
 		glDepthFunc(GL_LEQUAL);
-
+		glDepthMask(GL_FALSE);
+		glDisable(GL_CULL_FACE);
 
 		glActiveTexture(GL_TEXTURE0);
 
@@ -215,12 +211,17 @@ namespace RG
 		}
 
 		//Render cycle for all entities in scene
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		glFrontFace(GL_CCW);
 		glDepthMask(GL_TRUE);
 		glDepthFunc(GL_LESS);
+
 		shader->Bind();
 		shader->SetMat4("projection", glm::value_ptr(projection));
 		shader->SetMat4("view", glm::value_ptr(view));
 		shader->SetInt("skybox", 4);
+		shader->SetVec3("cameraPos", glm::value_ptr(cameraPos));
 		if (mapComp)
 		{
 			glActiveTexture(GL_TEXTURE4);
@@ -231,21 +232,23 @@ namespace RG
 			glm::mat4 model = glm::mat4(1.0f);
 
 			curTransform = (*ents)[i]->transform;
-			model = glm::translate(model, glm::vec3(curTransform->Position.x, curTransform->Position.y, curTransform->Position.z));
-
-			model = glm::rotate(model, glm::radians(curTransform->Rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-			model = glm::rotate(model, glm::radians(curTransform->Rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-			model = glm::rotate(model, glm::radians(curTransform->Rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
-
-			model = glm::scale(model, glm::vec3(curTransform->LocalScale.x, curTransform->LocalScale.y, curTransform->LocalScale.z));
-
-			shader->SetMat4("model", glm::value_ptr(model));
+			
 
 			//check if entity has texComp and bind if so
 			//TextureComponent* t = ents[0][i]->GetComponent<TextureComponent>();
 			ModelComponent* m = (*ents)[i]->GetComponent<ModelComponent>();
 			if (m != nullptr && m->m_model.get() && m->m_model.get()->GetPath().length() > 1)
 			{
+				model = glm::translate(model, glm::vec3(curTransform->Position.x, curTransform->Position.y, curTransform->Position.z));
+
+				Model* mModel = m->m_model.get();
+				//model = glm::rotate(model, glm::radians(mModel->anim.channels[0].Rotations[1].rot.x), glm::vec3(1.0f, 0.0f, 0.0f));
+				//model = glm::rotate(model, glm::radians(mModel->anim.channels[0].Rotations[1].rot.y), glm::vec3(0.0f, 1.0f, 0.0f));
+				//model = glm::rotate(model, glm::radians(mModel->anim.channels[0].Rotations[1].rot.z), glm::vec3(0.0f, 0.0f, 1.0f));
+
+				model = glm::scale(model, glm::vec3(curTransform->LocalScale.x, curTransform->LocalScale.y, curTransform->LocalScale.z));
+
+				shader->SetMat4("model", glm::value_ptr(model));
 				//shader->SetVec4("solidBaseColor", m->m_model->)
 				m->Draw(shader);
 			}
@@ -257,6 +260,8 @@ namespace RG
 				glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 			}
 		}
+
+		glDisable(GL_CULL_FACE);
 
 		m_nativeOutput->Bind();
 		SSAAShader->Bind();
@@ -296,7 +301,7 @@ namespace RG
 			//Get current size of window
 			float x = e->size.x, y = e->size.y;
 
-			projection = glm::perspective(glm::radians(fov), (float)(x / y), 0.1f, 10000.0f);
+			projection = glm::perspective(glm::radians(fov), (float)(x / y), 0.1f, 100000.0f);
 			curViewSizeVec = e->size;
 		}
 	}

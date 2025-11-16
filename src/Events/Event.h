@@ -16,6 +16,23 @@ namespace RG
 
 	//Funcs have to be in .h because of template
 
+	class StaticCallback : public CallbackBase
+	{
+	public:
+		void(*func)(class Event* e);
+
+		StaticCallback() {}
+		StaticCallback(void(*func)(struct Event* e))
+		{
+			this->func = func;
+		}
+
+		virtual void DoFunc(struct Event* e) override
+		{
+			(*func)(e);
+		}
+	};
+
 	template<typename T>
 	class Callback : public CallbackBase
 	{
@@ -38,7 +55,7 @@ namespace RG
 
 	enum EventType
 	{
-		OnRender, OnBegin, OnRenderUI, OnWindowResize, OnSceneInit
+		OnRender, OnBegin, OnRenderUI, OnWindowResize, OnSceneInit, OnRigidbodyCreated
 	};
 
 	struct Event
@@ -89,6 +106,13 @@ namespace RG
 		Vec<class Entity*>* vec;
 	};
 
+	struct OnRigidbodyCreatedEvent : public Event
+	{
+		OnRigidbodyCreatedEvent();
+
+		class Rigidbody* body;
+	};
+
 	class EventManager
 	{
 	public:
@@ -98,13 +122,19 @@ namespace RG
 		static void AddCallback(int EventType, T* obj, void(T::* func)(struct Event* e))
 		{
 			//instead of making the callback ptr manually, the function takes all the parameters and does it all at once
-			callbacks[EventType].PushMove(std::make_unique<Callback<T>>(obj, func));
+			(*callbacks)[EventType].PushMove(std::make_unique<Callback<T>>(obj, func));
+		}
+
+		static void AddStaticCallback(int EventType, void(*func)(struct Event* e))
+		{
+			//instead of making the callback ptr manually, the function takes all the parameters and does it all at once
+			(*callbacks)[EventType].PushMove(std::make_unique<StaticCallback>(func));
 		}
 
 		static void Invoke(Event* e);
 
-		Vec<Vec<std::unique_ptr<CallbackBase>>>* GetCallbacks() { return &callbacks; }
+		static Vec<Vec<std::unique_ptr<CallbackBase>>>*& GetCallbacks() { return callbacks; }
 	private:
-		static Vec<Vec<std::unique_ptr<CallbackBase>>> callbacks;
+		static Vec<Vec<std::unique_ptr<CallbackBase>>>* callbacks;
 	};
 }

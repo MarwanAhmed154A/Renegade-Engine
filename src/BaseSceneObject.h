@@ -49,5 +49,6 @@ namespace RG
 
 		
 		static int s_TypeID;
+		friend class ReflectionManager;
 	};
 }

@@ -134,7 +134,7 @@ namespace RG
 		{
 			shader->SetInt("hasMetallicRoughnessMap", false);
 			shader->SetFloat("metallicValue", mat.metallic);
-			shader->SetFloat("roughnessValue", mat.roughness);
+		    shader->SetFloat("roughnessValue", mat.roughness);
 		}
 
 

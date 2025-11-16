@@ -8,6 +8,7 @@ namespace RG
 	{
 		REFLECTABLE_CLASS(GLTexture, Texture)
 	public:
+		GLTexture() { path = ""; }
 		GLTexture(const char* file);
 		GLTexture(unsigned char* data, int width, int height, int nrChannels);
 
@@ -16,7 +17,6 @@ namespace RG
 
 		virtual unsigned int GetID() override;
 	private:
-		GLTexture() { path = ""; }
 		friend class TextureComponent;
 	};
 }

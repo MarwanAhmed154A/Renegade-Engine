@@ -24,6 +24,7 @@ namespace RG
 		glKeys[KeyCodes::ENTER].keyCode     = GLFW_KEY_ENTER;
 		glKeys[KeyCodes::LEFT_CTRL].keyCode = GLFW_KEY_LEFT_CONTROL;
 		glKeys[KeyCodes::R].keyCode         = GLFW_KEY_R;
+		glKeys[KeyCodes::X].keyCode         = GLFW_KEY_X;
 	}
 
 	void GLInput::UpdateImpl()
