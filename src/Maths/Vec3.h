@@ -19,8 +19,13 @@ namespace RG
 		void operator*=(Vec3 vec);
 		void operator/=(Vec3 vec);
 
-		static float Dot(Vec3 LH, Vec3 RH) { return LH.x * RH.x + LH.y * RH.y + LH.z * RH.z; }
-
+		static float Dot(Vec3 LH, Vec3 RH)   { return LH.x * RH.x + LH.y * RH.y + LH.z * RH.z; }
+		static Vec3  Cross(Vec3 LH, Vec3 RH) {
+			return Vec3(
+				LH.y * RH.z - LH.z * RH.y,
+				LH.z * RH.x - LH.x * RH.z,
+				LH.x * RH.y - LH.y * RH.x); 
+		}
 		float x, y, z;
 	};
 }

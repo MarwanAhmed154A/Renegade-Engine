@@ -242,9 +242,9 @@ namespace RG
 				model = glm::translate(model, glm::vec3(curTransform->Position.x, curTransform->Position.y, curTransform->Position.z));
 
 				Model* mModel = m->m_model.get();
-				//model = glm::rotate(model, glm::radians(mModel->anim.channels[0].Rotations[1].rot.x), glm::vec3(1.0f, 0.0f, 0.0f));
-				//model = glm::rotate(model, glm::radians(mModel->anim.channels[0].Rotations[1].rot.y), glm::vec3(0.0f, 1.0f, 0.0f));
-				//model = glm::rotate(model, glm::radians(mModel->anim.channels[0].Rotations[1].rot.z), glm::vec3(0.0f, 0.0f, 1.0f));
+				model = glm::rotate(model, glm::radians(curTransform->Rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+				model = glm::rotate(model, glm::radians(curTransform->Rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+				model = glm::rotate(model, glm::radians(curTransform->Rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
 
 				model = glm::scale(model, glm::vec3(curTransform->LocalScale.x, curTransform->LocalScale.y, curTransform->LocalScale.z));
 

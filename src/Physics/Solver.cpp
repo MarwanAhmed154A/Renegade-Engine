@@ -5,6 +5,7 @@
 #include "Maths/Vec3.h"
 #include "Scene/SceneManager.h"
 #include "Maths/Quat.h"
+#include <iostream>
 
 RG::Vec<RG::Rigidbody*> RG::Solver::rigidbodies;
 
@@ -99,48 +100,150 @@ namespace RG
 
 	Collision Solver::DetectCollision(BoxCollider* collider1, BoxCollider* collider2)
 	{
-		Transform* transform1 = collider1->GetParent()->GetComponent<Transform>();
-		Transform* transform2 = collider2->GetParent()->GetComponent<Transform>();
+		Transform* t1 = collider1->GetParent()->GetComponent<Transform>();
+		Transform* t2 = collider2->GetParent()->GetComponent<Transform>();
+		if (!t1 || !t2) return Collision(nullptr, nullptr, Vec3(0), 0);
 
+		// compute quaternions for each transform (from Euler XYZ in radians)
+		auto quatFromEuler = [](const Vec3& e) {
+			float hx = e.x * 0.5f, hy = e.y * 0.5f, hz = e.z * 0.5f;
+			float sx = sin(hx), cx = cos(hx);
+			float sy = sin(hy), cy = cos(hy);
+			float sz = sin(hz), cz = cos(hz);
 
-		float xDis = transform1->Position.x - transform2->Position.x;
-		float yDis = transform1->Position.y - transform2->Position.y;
-		float zDis = transform1->Position.z - transform2->Position.z;
+			Quat q;
+			q.w = cx * cy * cz - sx * sy * sz;
+			q.x = sx * cy * cz + cx * sy * sz;
+			q.y = cx * sy * cz - sx * cy * sz;
+			q.z = cx * cy * sz + sx * sy * cz;
+			return q;
+			};
 
-		float overlapX = (collider1->size.x + collider2->size.x) - abs(xDis);
-		float overlapY = (collider1->size.y + collider2->size.y) - abs(yDis);
-		float overlapZ = (collider1->size.z + collider2->size.z) - abs(zDis);
+		float deg2rad = 0.0174532925199432957f;
 
-		// Skip if there’s no overlap on any axis
-		if (overlapX <= 0 || overlapY <= 0 || overlapZ <= 0)
-			return Collision(nullptr, nullptr, Vec3(0), 0);
+		Vec3 e = t1->Rotation * deg2rad;
+		Quat q1 = quatFromEuler(e);
+		q1.Normalize();
 
-		float penetration = 0;
-		Vec3 normal;
-		if (overlapX < overlapY && overlapX < overlapZ)
+		e = t2->Rotation * deg2rad;
+		Quat q2 = quatFromEuler(e);
+		q2.Normalize();
+
+		// local half extents
+		Vec3 half1 = collider1->size;
+		Vec3 half2 = collider2->size;
+
+		// world corners (optional: for projection method below we can use centers+axes+extents)
+		Vec3 corners1[8], corners2[8];
+		int idx = 0;
+		for (int xi = -1; xi <= 1; xi += 2)
+		for (int yi = -1; yi <= 1; yi += 2)
+		for (int zi = -1; zi <= 1; zi += 2)
 		{
-			penetration = overlapX;
-			normal = (xDis > 0) ? Vec3(-1, 0, 0) : Vec3(1, 0, 0);
+			Vec3 local = Vec3((float)xi, (float)yi, (float)zi) * half1;
+			corners1[idx] = t1->Position + (q1 * local);
+
+			Vec3 local2 = Vec3((float)xi, (float)yi, (float)zi) * half2;
+			corners2[idx++] = t2->Position + (q2 * local2);
 		}
-		else if (overlapY < overlapZ)
+
+		// get local axes (rotated basis) for both boxes
+		Vec3 a[3] = { q1 * Vec3(1,0,0), q1 * Vec3(0,1,0), q1 * Vec3(0,0,1) };
+		Vec3 b[3] = { q2 * Vec3(1,0,0), q2 * Vec3(0,1,0), q2 * Vec3(0,0,1) };
+
+		// build axes array (first 6 are box axes, then 9 cross products)
+		Vec3 axes[15];
+		for (int i = 0; i < 3; ++i) axes[i] = a[i];
+		for (int i = 0; i < 3; ++i) axes[3 + i] = b[i];
+		for (int i = 0; i < 3; ++i)
+			for (int j = 0; j < 3; ++j)
+				axes[6 + i * 3 + j] = Vec3::Cross(a[i], b[j]);
+
+		// SAT: test all axes, keep minimum overlap
+		const float EPS = 1e-8f;
+		float minOverlap = FLT_MAX;
+		Vec3 bestAxis(0, 0, 0);
+
+		for (int ai = 0; ai < 15; ++ai)
 		{
-			penetration = overlapY;
-			normal = (yDis > 0) ? Vec3(0, -1, 0) : Vec3(0, 1, 0);
+			Vec3 axis = axes[ai];
+
+			// skip near-zero axes (parallel edges produce zero cross)
+			float axisLen2 = Vec3::Dot(axis, axis);
+			if (axisLen2 < EPS) continue;
+			axis = axis / sqrt(axisLen2); // normalize
+
+			float minA = FLT_MAX, maxA = -FLT_MAX;
+			float minB = FLT_MAX, maxB = -FLT_MAX;
+
+			for (int k = 0; k < 8; ++k)
+			{
+				float pA = Vec3::Dot(corners1[k], axis);
+				minA = std::min(minA, pA);
+				maxA = std::max(maxA, pA);
+
+				float pB = Vec3::Dot(corners2[k], axis);
+				minB = std::min(minB, pB);
+				maxB = std::max(maxB, pB);
+			}
+
+			float overlap = std::min(maxA, maxB) - std::max(minA, minB);
+			if (overlap <= 0.0f) // separating axis found
+				return Collision(nullptr, nullptr, Vec3(0), 0);
+
+			if (overlap < minOverlap)
+			{
+				minOverlap = overlap;
+				bestAxis = axis;
+			}
 		}
-		else
-		{
-			penetration = overlapZ;
-			normal = (zDis > 0) ? Vec3(0, 0, -1) : Vec3(0, 0, 1);
-		}
-	
 
-		Entity* ent1 = collider1->GetParent();
-		Entity* ent2 = collider2->GetParent();
+		// Ensure normal points from box1 -> box2
+		Vec3 centerDir = t2->Position - t1->Position;
+		if (Vec3::Dot(centerDir, bestAxis) < 0.0f) bestAxis = bestAxis * -1;
 
-		Rigidbody* rb1 = ent1->GetComponent<Rigidbody>();
-		Rigidbody* rb2 = ent2->GetComponent<Rigidbody>();
+		Rigidbody* rb1 = collider1->GetParent()->GetComponent<Rigidbody>();
+		Rigidbody* rb2 = collider2->GetParent()->GetComponent<Rigidbody>();
+		return Collision(rb1, rb2, bestAxis, minOverlap);
 
-		return Collision(rb1, rb2, normal, penetration);
+		//float xDis = transform1->Position.x - transform2->Position.x;
+		//float yDis = transform1->Position.y - transform2->Position.y;
+		//float zDis = transform1->Position.z - transform2->Position.z;
+		//
+		//float overlapX = (collider1->size.x + collider2->size.x) - abs(xDis);
+		//float overlapY = (collider1->size.y + collider2->size.y) - abs(yDis);
+		//float overlapZ = (collider1->size.z + collider2->size.z) - abs(zDis);
+		//
+		//// Skip if there’s no overlap on any axis
+		//if (overlapX <= 0 || overlapY <= 0 || overlapZ <= 0)
+		//	return Collision(nullptr, nullptr, Vec3(0), 0);
+		//
+		//float penetration = 0;
+		//Vec3 normal;
+		//if (overlapX < overlapY && overlapX < overlapZ)
+		//{
+		//	penetration = overlapX;
+		//	normal = (xDis > 0) ? Vec3(-1, 0, 0) : Vec3(1, 0, 0);
+		//}
+		//else if (overlapY < overlapZ)
+		//{
+		//	penetration = overlapY;
+		//	normal = (yDis > 0) ? Vec3(0, -1, 0) : Vec3(0, 1, 0);
+		//}
+		//else
+		//{
+		//	penetration = overlapZ;
+		//	normal = (zDis > 0) ? Vec3(0, 0, -1) : Vec3(0, 0, 1);
+		//}
+		//
+		//
+		//Entity* ent1 = collider1->GetParent();
+		//Entity* ent2 = collider2->GetParent();
+		//
+		//Rigidbody* rb1 = ent1->GetComponent<Rigidbody>();
+		//Rigidbody* rb2 = ent2->GetComponent<Rigidbody>();
+		//
+		//return Collision(rb1, rb2, normal, penetration);
 	}
 
 	void Solver::IterateVelocity(Vec<Collision>& collisions)
@@ -197,7 +300,7 @@ namespace RG
 				if (totalInvMass == 0) continue; // both static
 
 				Vec3 correction = c.normal * ((c.penetration / totalInvMass) * baumgarteFactor);
-				RG_CORE_INFO(correction.y);
+
 				Transform* tA = A->GetParent()->transform;
 				Transform* tB = B->GetParent()->transform;
 
