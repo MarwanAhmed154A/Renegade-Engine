@@ -13,7 +13,7 @@ namespace RG
 		 Rigidbody();
 		~Rigidbody();
 
-		Vec3 velocity, force;
+		Vec3 velocity, angularVelocity, force;
 		float mass;
 		bool b_static;
 	private:
